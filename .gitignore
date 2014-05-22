@@ -1,0 +1,27 @@
+lib-cov
+*.seed
+*.log
+# *.csv
+*.dat
+*.out
+*.pid
+*.gz
+
+*.sublime-workspace
+*.project
+
+pids
+logs
+results
+
+npm-debug.log
+
+.DS_Store
+node_modules
+newrelic_agent.log
+backups
+mongobackups
+heapdump
+.migrate
+# Ignore auto-generated files from IDEs
+.idea/

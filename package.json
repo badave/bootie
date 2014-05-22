@@ -1,0 +1,38 @@
+{
+  "name": "bootie",
+  "version": "0.1.2",
+  "description": "Bootie Bootie Bootie",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha -R spec test"
+  },
+  "homepage": "https://github.com/ptshih/bootie",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ptshih/bootie.git"
+  },
+  "keywords": [
+    "bootie",
+    "mongo",
+    "mongodb"
+  ],
+  "dependencies": {
+    "backbone": "^1.1.2",
+    "bluebird": "~1.2.4",
+    "lodash": "~2.4.1",
+    "mongodb": "~1.4.5"
+  },
+  "devDependencies": {
+    "mocha": "^1.19.0",
+    "chai": "^1.9.1",
+    "sinon": "^1.10.0",
+    "sinon-chai": "^2.5.0",
+    "chai-as-promised": "^4.1.1"
+  },
+  "author": {
+    "name": "Peter Shih",
+    "web": "https://github.com/ptshih"
+  },
+  "license": "MIT",
+  "readmeFilename": "README.md"
+}
