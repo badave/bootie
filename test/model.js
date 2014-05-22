@@ -79,18 +79,6 @@ describe("Models", function() {
     model.save();
   });
 
-  it("should save with create and errors", function(done) {
-    var model = new Model();
-    model.save(null, {
-      forceError: true,
-      error: function(model, resp, options) {
-        // TODO
-        (resp instanceof Error).should.be.true;
-        done();
-      }
-    });
-  });
-
   it("should save with update", function(done) {
     var model = new Model({
       _id: savedId,
@@ -140,6 +128,31 @@ describe("Models", function() {
     });
   });
 
+  it("should fetch with promise", function(done) {
+    var model = new Model({
+      _id: savedId
+    });
+    model.fetch()
+      .then(function(resp) {
+        done();
+      })
+      .catch(function(err) {
+        done();
+      });
+  });
+
+  it("should fetch with promise with errors", function(done) {
+    var model = new Model();
+    model.fetch()
+      .then(function(resp) {
+        done();
+      })
+      .catch(function(err) {
+        done();
+      });
+  });
+
+
   it("should fetch with no ID with errors", function(done) {
     var model = new Model();
     model.fetch({
@@ -151,23 +164,10 @@ describe("Models", function() {
         (resp instanceof Error).should.be.true;
         done();
       }
+    }).catch(function(err) {
+      // Promise rejects even if error callback fires
     });
   });
-
-  it("should fetch with errors", function(done) {
-    var model = new Model({
-      _id: savedId
-    });
-    model.fetch({
-      forceError: true,
-      error: function(model, resp, options) {
-        resp.message.should.equal("Forced Error");
-        (resp instanceof Error).should.be.true;
-        done();
-      }
-    });
-  });
-
 
   it("should fetch with where with regex", function(done) {
     var model = new Model();

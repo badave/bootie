@@ -1,6 +1,7 @@
 "use strict";
 
 var _ = require('lodash');
+var Promise = require('bluebird');
 var Backbone = require('backbone');
 
 module.exports = Backbone.Model.extend({
@@ -40,17 +41,7 @@ module.exports = Backbone.Model.extend({
     }
     var op = this[method].call(this, model, options);
     model.trigger("request", model, op, options);
-  },
-
-  // This is for testing purposes only
-  // It provides an option to force an error
-  wrapForceError: function(options) {
-    if (options.forceError) {
-      options.error(new Error("Forced Error"));
-      return true;
-    } else {
-      return false;
-    }
+    return op;
   },
 
   // Takes the mongodb response and calls the Backbone success method
@@ -66,9 +57,6 @@ module.exports = Backbone.Model.extend({
 
   // Inserts a mongodb document
   create: function(model, options) {
-    if (this.wrapForceError(options)) {
-      return;
-    }
     return this.db.insert(this.urlRoot, model.toJSON(), this.wrapResponse(options));
   },
 
@@ -77,17 +65,15 @@ module.exports = Backbone.Model.extend({
   update: function(model, options) {
     // If no ID in query, error out
     if (model.isNew()) {
-      options.error(new Error("No ID for Model"));
-      return;
+      var err = new Error("No ID for Model");
+      options.error(err);
+      return Promise.reject(err);
     }
 
     // Build query against the model's id
     var query = {};
     query[this.idAttribute] = model.id;
 
-    if (this.wrapForceError(options)) {
-      return;
-    }
     return this.db.findAndModify(this.urlRoot, query, model.toJSON(), this.wrapResponse(options));
   },
 
@@ -96,8 +82,9 @@ module.exports = Backbone.Model.extend({
   patch: function(model, options) {
     // If no ID in query, error out
     if (model.isNew()) {
-      options.error(new Error("No ID for Model"));
-      return;
+      var err = new Error("No ID for Model");
+      options.error(err);
+      return Promise.reject(err);
     }
 
     // Build query against the model's id
@@ -113,9 +100,6 @@ module.exports = Backbone.Model.extend({
       "$set": attrs
     };
 
-    if (this.wrapForceError(options)) {
-      return;
-    }
     return this.db.findAndModify(this.urlRoot, query, obj, this.wrapResponse(options));
   },
 
@@ -123,17 +107,15 @@ module.exports = Backbone.Model.extend({
   delete: function(model, options) {
     // If no ID in query, error out
     if (model.isNew()) {
-      options.error(new Error("No ID for Model"));
-      return;
+      var err = new Error("No ID for Model");
+      options.error(err);
+      return Promise.reject(err);
     }
 
     // Build query against the model's id
     var query = {};
     query[this.idAttribute] = model.id;
 
-    if (this.wrapForceError(options)) {
-      return;
-    }
     return this.db.remove(this.urlRoot, query, this.wrapResponse(options));
   },
 
@@ -148,17 +130,15 @@ module.exports = Backbone.Model.extend({
     } else {
       if (model.isNew()) {
         // If no ID in query, error out
-        options.error(new Error("No ID for Model"));
-        return;
+        var err = new Error("No ID for Model");
+        options.error(err);
+        return Promise.reject(err);
       }
 
       // Build query against the model's id
       query[this.idAttribute] = model.id;
     }
 
-    if (this.wrapForceError(options)) {
-      return;
-    }
     return this.db.findOne(this.urlRoot, query, this.wrapResponse(options));
   }
 
