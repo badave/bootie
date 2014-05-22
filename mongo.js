@@ -2,7 +2,6 @@
 
 var _ = require('lodash');
 var Promise = require('bluebird');
-
 var EventEmitter = require('events').EventEmitter;
 var MongoClient = require('mongodb').MongoClient;
 var ObjectID = require('mongodb').ObjectID;

@@ -1,8 +1,9 @@
 "use strict";
 
+// Dependencies
+// ---
 var _ = require('lodash');
 var Backbone = require('backbone');
-
 var Model = require("./model");
 
 module.exports = Backbone.Collection.extend({
