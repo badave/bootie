@@ -7,37 +7,56 @@
 // Dependencies
 // ---
 var _ = require('lodash');
+var Backbone = require('backbone');
 var redis = require('redis');
 var Mongo = require('./mongo');
 
 // DatabaseManager is a singleton that maintains the databases
-var Database = module.exports = Air.Backbone.Model.extend({
+module.exports = Backbone.Model.extend({
   className: "Database",
+  debug: false,
+
+  defaults: function() {
+    return {
+      mongo: {
+        url: "mongodb://localhost:27017/test"
+      },
+      redis: {
+        port: 6379,
+        host: "localhost",
+        auth: null
+      }
+    };
+  },
 
   initialize: function() {
-    this.setupMongo();
-    this.setupRedis();
+    this.setupMongo(this.get('mongo').url);
+    // this.setupRedis(this.get('redis').port, this.get('redis').host, this.get('redis').auth);
   },
 
   setupRedis: function() {
-    var cache = redis.createClient(config.redis.cache.port, config.redis.cache.host);
-    cache.auth(config.redis.cache.auth);
-    this.redis_cache = cache;
+    var cache = redis.createClient(port, host);
+    cache.auth(auth);
+    this.redis = cache;
   },
 
-  setupMongo: function() {
-    this.primary = new Mongo(config.mongodb.cujo);
-    this.primary.name = "cujo_air";
-    this.setupEvents(this.primary);
+  setupMongo: function(url) {
+    this.mongo = new Mongo(url);
+    this.mongo.name = url;
+    this.setupEvents(this.mongo);
   },
 
   setupEvents: function(db) {
     db.on("connect", function(url) {
-      // _.info("Mongo %d connected to url: %s - %s", config.pid, url, db.name);
-    });
+      if (this.debug) {
+        console.log("Mongo %d connected to url: %s - %s", process.pid, url);
+      }
+    }.bind(this));
 
     db.on("error", function(error) {
-      // _.warn("Mongo %d had an error: %s - %s", config.pid, error.message, db.name);
-    });
+      if (this.debug) {
+        console.error("Mongo %d had an error at url: %s - %s", process.pid, url, error.message)
+      }
+    }.bind(this));
   }
 });

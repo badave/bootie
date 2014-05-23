@@ -26,9 +26,8 @@ module.exports = function(options) {
 
   // Each controller has a `routes` object
   // Automagically hook up all routes defined in controllers
-  if (options.Controllers) {
-    _.each(options.Controllers, function(Controller) {
-      var controller = new Controller();
+  if (options.controllers) {
+    _.each(options.controllers, function(controller) {
       var routes = controller.routes;
 
       _.each(routes, function(route, method) {

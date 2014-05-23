@@ -285,6 +285,7 @@ _.extend(Mongo.prototype, {
       .then(function(data) {
         if (!data && options.require) {
           var requireErr = new Error("Document not found.")
+          requireErr.code = 404;
           throw requireErr;
         }
 

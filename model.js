@@ -14,9 +14,6 @@ module.exports = Backbone.Model.extend({
   idAttribute: "_id",
   userIdAttribute: "user_id",
 
-  // The mongodb connection object
-  db: null,
-
   // The mongodb collection name
   urlRoot: "models",
 

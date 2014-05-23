@@ -17,6 +17,7 @@ var _ = require('lodash');
 var Controller = require('./controller');
 var Model = require("./model");
 var Collection = require("./collection");
+var Database = require("./database");
 
 module.exports = Controller.extend({
   className: "CrudController",
@@ -31,9 +32,28 @@ module.exports = Controller.extend({
   // Available controller actions (see `setupRoutes` for more info)
   crud: ["C", "R", "O", "U", "D"],
 
+  initialize: function() {
+    // Make sure to call `super` as a best practice when overriding
+    Controller.prototype.initialize.call(this);
+
+    if (this.get('mongo')) {
+      this.database = new Database({
+        mongo: this.get('mongo')
+      });
+      this.database.mongo.connect().bind(this).then(function() {
+        // Mongo connected
+      }).catch(function(err) {
+        // Mongo failed to connect
+        if (this.debug) {
+          console.log(err)
+        }
+      });
+    }
+  },
+
   // Base path appends `urlRoot`
   basePath: function() {
-    return this.path + "/" + this.urlRoot;
+    return this.path + this.urlRoot;
   },
 
   // Sets up default CRUD routes
@@ -43,6 +63,7 @@ module.exports = Controller.extend({
     // Make sure to call `super` as a best practice when overriding
     Controller.prototype.setupRoutes.call(this);
 
+    // Get the base url path
     var basePath = _.result(this, "basePath");
 
     // Setup CRUD routes
@@ -89,6 +110,16 @@ module.exports = Controller.extend({
     }.bind(this));
   },
 
+  setupPreMiddleware: function() {
+    this.pre.push(this.authenticateUser);
+  },
+
+  authenticateUser: function(req, res, next) {
+    // This is the ideal place to authenticate the user with the db
+    // and set `req.user` and optionally `req.admin`
+    next();
+  },
+
   // CRUD functions
   find: function(req, res, next, options) {
     var collection = this.setupCollection(req);
@@ -124,11 +155,12 @@ module.exports = Controller.extend({
     return model.fetch({
       require: true
     }).bind(this).tap(function(model) {
-      if (model.get(model.userIdAttribute) !== req.user.id && !req.admin) {
+      if (model && model.get(model.userIdAttribute) !== req.user.id && !req.admin) {
         var err = new Error("Permission denied");
         err.code = 403;
         throw err;
       }
+      return model;
     }).then(this.nextThen(req, res, next)).catch(this.nextCatch(req, res, next));
   },
 
@@ -144,9 +176,9 @@ module.exports = Controller.extend({
 
     return model.fetch({
       require: true
-    }).bind(this).then(function() {
+    }).bind(this).then(function(model) {
       // checks to see if the user owns this model
-      if (model.get(model.userIdAttribute) !== req.user.id && !req.admin) {
+      if (model && model.get(model.userIdAttribute) !== req.user.id && !req.admin) {
         var err = new Error("Permission denied");
         err.code = 403;
         throw err;
@@ -175,6 +207,7 @@ module.exports = Controller.extend({
 
   setupModel: function(req) {
     var model = new this.model();
+    model.db = this.database.mongo;
 
     if (req.user) {
       model.user = req.user;
@@ -190,6 +223,7 @@ module.exports = Controller.extend({
 
   setupCollection: function(req) {
     var collection = new this.collection();
+    collection.db = this.database.mongo;
 
     if (req.user) {
       collection.user = req.user;

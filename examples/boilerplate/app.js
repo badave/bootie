@@ -15,6 +15,7 @@ var favicon = require('serve-favicon');
 
 // Express app
 var app = express();
+var env = process.env.NODE_ENV;
 
 
 // Middleware before Router
@@ -36,7 +37,7 @@ app.use(morgan({
 }));
 
 // Support pseudo PUT/DELETE via headers
-app.use(methodOverride())
+app.use(methodOverride());
 
 // Static assets
 var oneDay = 86400000;
@@ -52,10 +53,18 @@ app.use(bodyParser());
 app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
 
 // Router
+var TestController = require('./controllers/test_controller');
+var TestCrudController = require('./controllers/test_crud_controller');
+
 var router = new Bootie.Router({
   version: "v2",
-  Controllers: {
-    test: require('./test_controller')
+  controllers: {
+    test: new TestController(),
+    test_crud: new TestCrudController({
+      mongo: {
+        url: "mongodb://localhost:27017/test"
+      }
+    })
   }
 });
 app.use(router.url, router);

@@ -10,9 +10,6 @@ module.exports = Backbone.Collection.extend({
   className: "Collection",
   debug: false,
 
-  // the mongodb connection object
-  db: null,
-
   model: Model,
 
   // Copied from Backbone, not currently overridden

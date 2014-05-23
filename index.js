@@ -15,7 +15,7 @@ Bootie.Backbone = require('backbone');
 Bootie._ = require('lodash');
 
 // Database manager
-// Bootie.Database = require('./database');
+Bootie.Database = require('./database');
 // Bootie.dbs = new Bootie.Database();
 // Bootie.dbs.primary.connect();
 
