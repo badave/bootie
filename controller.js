@@ -233,16 +233,16 @@ module.exports = Backbone.Model.extend({
   },
 
 
-  // Renderers
+  // Render
   // ---
   
   renderModel: function(model) {
-    return model.render().content();
+    return model.render();
   },
 
   renderCollection: function(collection) {
     return collection.map(function(model) {
-      return model.render().content();
+      return model.render();
     });
   },
 

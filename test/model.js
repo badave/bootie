@@ -15,7 +15,7 @@ describe("Models", function() {
   // Connect to mongodb
 
   before(function(done) {
-    Model.prototype.urlRoot = "test_models";
+    Model.prototype.urlRoot = "tests";
     
     Model.prototype.validate = function(attributes, options) {
       if (attributes.name === "Jack Dagnels") {
@@ -30,7 +30,7 @@ describe("Models", function() {
     db.connect();
     db.on("connect", function(url) {
       Model.prototype.db = db;
-      Model.prototype.db.eraseCollection("models");
+      Model.prototype.db.eraseCollection("tests");
       done();
     });
   });

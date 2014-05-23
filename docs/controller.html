@@ -79,11 +79,6 @@
               </a>
             
               
-              <a class="source" href="renderer.html">
-                renderer.js
-              </a>
-            
-              
               <a class="source" href="router.html">
                 router.js
               </a>
@@ -715,7 +710,10 @@ We should log these errors somewhere remotely</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.debug) {
+      console.log(err.stack);
+    }
+
     res.data = envelope;
     next();
   },</pre></div></div>
@@ -828,7 +826,7 @@ Server actually responds to the request here</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-42">&#182;</a>
               </div>
-              <h2 id="renderers">Renderers</h2>
+              <h2 id="render">Render</h2>
 
             </div>
             
@@ -846,12 +844,12 @@ Server actually responds to the request here</p>
             
             <div class="content"><div class='highlight'><pre>  
   renderModel: <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(model)</span> {</span>
-    <span class="hljs-keyword">return</span> model.render().content();
+    <span class="hljs-keyword">return</span> model.render();
   },
 
   renderCollection: <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(collection)</span> {</span>
     <span class="hljs-keyword">return</span> collection.map(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(model)</span> {</span>
-      <span class="hljs-keyword">return</span> model.render().content();
+      <span class="hljs-keyword">return</span> model.render();
     });
   },</pre></div></div>
             

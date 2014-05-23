@@ -10,6 +10,8 @@ var TestCollection = require('../collections/test_collection');
 module.exports = Bootie.CrudController.extend({
   className: "TestCrudController",
 
+  urlRoot: 'tests',
+
   model: TestModel,
   collection: TestCollection,
 

@@ -80,6 +80,7 @@ module.exports = Backbone.Collection.extend({
       query = options.query;
     }
 
+    // Don't allow any mongo options for now
     var mongoOptions = {};
     return this.db.count(this.model.prototype.urlRoot, query, mongoOptions, this.wrapResponse(options));
   }

@@ -14,13 +14,12 @@ var Bootie = {};
 Bootie.Backbone = require('backbone');
 Bootie._ = require('lodash');
 
-// Database manager
-Bootie.Database = require('./database');
-// Bootie.dbs = new Bootie.Database();
-// Bootie.dbs.primary.connect();
-
 // All external libraries
 // ---
+
+// Database manager
+// [Annotated Source](database.html)
+Bootie.Database = require('./database');
 
 // Router
 // [Annotated Source](router.html)
@@ -45,10 +44,6 @@ Bootie.Collection = require('./collection');
 // Adapters connect to third-party APIs and services.
 // [Annotated Source](adapter.html)
 Bootie.Adapter = require('./adapter');
-
-// Renderers are the best
-// [Annotated Source](renderer.html)
-Bootie.Renderer = require('./renderer');
 
 // Errors dawg.
 // [Annotated Source](error.html)

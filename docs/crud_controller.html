@@ -79,11 +79,6 @@
               </a>
             
               
-              <a class="source" href="renderer.html">
-                renderer.js
-              </a>
-            
-              
               <a class="source" href="router.html">
                 router.js
               </a>
@@ -207,6 +202,7 @@
 <span class="hljs-keyword">var</span> Controller = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./controller'</span>);
 <span class="hljs-keyword">var</span> Model = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./model"</span>);
 <span class="hljs-keyword">var</span> Collection = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./collection"</span>);
+<span class="hljs-keyword">var</span> Database = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./database"</span>);
 
 module.exports = Controller.extend({
   className: <span class="hljs-string">"CrudController"</span>,
@@ -243,7 +239,9 @@ module.exports = Controller.extend({
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  crud: [<span class="hljs-string">"C"</span>, <span class="hljs-string">"R"</span>, <span class="hljs-string">"O"</span>, <span class="hljs-string">"U"</span>, <span class="hljs-string">"D"</span>],</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  crud: [<span class="hljs-string">"C"</span>, <span class="hljs-string">"R"</span>, <span class="hljs-string">"O"</span>, <span class="hljs-string">"U"</span>, <span class="hljs-string">"D"</span>],
+
+  initialize: <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span></pre></div></div>
             
         </li>
         
@@ -254,13 +252,17 @@ module.exports = Controller.extend({
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-11">&#182;</a>
               </div>
-              <p>Base path appends <code>urlRoot</code></p>
+              <p>Make sure to call <code>super</code> as a best practice when overriding</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  basePath: <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
-    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.path + <span class="hljs-string">"/"</span> + <span class="hljs-keyword">this</span>.urlRoot;
-  },</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    Controller.prototype.initialize.call(<span class="hljs-keyword">this</span>);
+
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.get(<span class="hljs-string">'mongo'</span>)) {
+      <span class="hljs-keyword">this</span>.database = <span class="hljs-keyword">new</span> Database({
+        mongo: <span class="hljs-keyword">this</span>.get(<span class="hljs-string">'mongo'</span>)
+      });
+      <span class="hljs-keyword">this</span>.database.mongo.connect().bind(<span class="hljs-keyword">this</span>).then(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span></pre></div></div>
             
         </li>
         
@@ -270,6 +272,58 @@ module.exports = Controller.extend({
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>Mongo connected</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      }).catch(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(err)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>Mongo failed to connect</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.debug) {
+          console.log(err)
+        }
+      });
+    }
+  },</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>Base path appends <code>urlRoot</code></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  basePath: <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.path + <span class="hljs-keyword">this</span>.urlRoot;
+  },</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
               </div>
               <p>Sets up default CRUD routes
 Adds <code>requireUser</code> middleware to all routes
@@ -282,28 +336,41 @@ Adds <code>requireJSON</code> middleware for post/put routes</p>
         </li>
         
         
-        <li id="section-13">
+        <li id="section-16">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-13">&#182;</a>
+                <a class="pilcrow" href="#section-16">&#182;</a>
               </div>
               <p>Make sure to call <code>super</code> as a best practice when overriding</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    Controller.prototype.setupRoutes.call(<span class="hljs-keyword">this</span>);
-
-    <span class="hljs-keyword">var</span> basePath = _.result(<span class="hljs-keyword">this</span>, <span class="hljs-string">"basePath"</span>);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    Controller.prototype.setupRoutes.call(<span class="hljs-keyword">this</span>);</pre></div></div>
             
         </li>
         
         
-        <li id="section-14">
+        <li id="section-17">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-14">&#182;</a>
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>Get the base url path</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> basePath = _.result(<span class="hljs-keyword">this</span>, <span class="hljs-string">"basePath"</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
               <p>Setup CRUD routes</p>
 
@@ -316,11 +383,11 @@ Adds <code>requireJSON</code> middleware for post/put routes</p>
         </li>
         
         
-        <li id="section-15">
+        <li id="section-19">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-15">&#182;</a>
+                <a class="pilcrow" href="#section-19">&#182;</a>
               </div>
               <p>Create</p>
 
@@ -336,11 +403,11 @@ Adds <code>requireJSON</code> middleware for post/put routes</p>
         </li>
         
         
-        <li id="section-16">
+        <li id="section-20">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-16">&#182;</a>
+                <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
               <p>Find</p>
 
@@ -356,11 +423,11 @@ Adds <code>requireJSON</code> middleware for post/put routes</p>
         </li>
         
         
-        <li id="section-17">
+        <li id="section-21">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-17">&#182;</a>
+                <a class="pilcrow" href="#section-21">&#182;</a>
               </div>
               <p>FindOne</p>
 
@@ -376,11 +443,11 @@ Adds <code>requireJSON</code> middleware for post/put routes</p>
         </li>
         
         
-        <li id="section-18">
+        <li id="section-22">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-18">&#182;</a>
+                <a class="pilcrow" href="#section-22">&#182;</a>
               </div>
               <p>Update</p>
 
@@ -396,11 +463,11 @@ Adds <code>requireJSON</code> middleware for post/put routes</p>
         </li>
         
         
-        <li id="section-19">
+        <li id="section-23">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-19">&#182;</a>
+                <a class="pilcrow" href="#section-23">&#182;</a>
               </div>
               <p>Destroy</p>
 
@@ -415,16 +482,39 @@ Adds <code>requireJSON</code> middleware for post/put routes</p>
           <span class="hljs-keyword">break</span>;
       }
     }.bind(<span class="hljs-keyword">this</span>));
+  },
+
+  setupPreMiddleware: <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
+    <span class="hljs-keyword">this</span>.pre.push(<span class="hljs-keyword">this</span>.authenticateUser);
+  },
+
+  authenticateUser: <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(req, res, next)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-24">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-24">&#182;</a>
+              </div>
+              <p>This is the ideal place to authenticate the user with the db
+and set <code>req.user</code> and optionally <code>req.admin</code></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    next();
   },</pre></div></div>
             
         </li>
         
         
-        <li id="section-20">
+        <li id="section-25">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-20">&#182;</a>
+                <a class="pilcrow" href="#section-25">&#182;</a>
               </div>
               <p>CRUD functions</p>
 
@@ -443,11 +533,11 @@ Adds <code>requireJSON</code> middleware for post/put routes</p>
         </li>
         
         
-        <li id="section-21">
+        <li id="section-26">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-21">&#182;</a>
+                <a class="pilcrow" href="#section-26">&#182;</a>
               </div>
               <p>If godmode is on, return list of ALL orders</p>
 
@@ -467,6 +557,8 @@ Adds <code>requireJSON</code> middleware for post/put routes</p>
           has_more: <span class="hljs-built_in">parseInt</span>(collection.models.length) &lt; <span class="hljs-built_in">parseInt</span>(total)
         };
       });
+    }).then(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(count)</span> {</span>
+      <span class="hljs-keyword">return</span> collection;
     }).then(<span class="hljs-keyword">this</span>.nextThen(req, res, next)).catch(<span class="hljs-keyword">this</span>.nextCatch(req, res, next));
   },
 
@@ -476,11 +568,12 @@ Adds <code>requireJSON</code> middleware for post/put routes</p>
     <span class="hljs-keyword">return</span> model.fetch({
       <span class="hljs-built_in">require</span>: <span class="hljs-literal">true</span>
     }).bind(<span class="hljs-keyword">this</span>).tap(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(model)</span> {</span>
-      <span class="hljs-keyword">if</span> (model.get(model.userIdAttribute) !== req.user.id &amp;&amp; !req.admin) {
+      <span class="hljs-keyword">if</span> (model &amp;&amp; model.get(model.userIdAttribute) !== req.user.id &amp;&amp; !req.admin) {
         <span class="hljs-keyword">var</span> err = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">"Permission denied"</span>);
         err.code = <span class="hljs-number">403</span>;
         <span class="hljs-keyword">throw</span> err;
       }
+      <span class="hljs-keyword">return</span> model;
     }).then(<span class="hljs-keyword">this</span>.nextThen(req, res, next)).catch(<span class="hljs-keyword">this</span>.nextCatch(req, res, next));
   },
 
@@ -496,22 +589,22 @@ Adds <code>requireJSON</code> middleware for post/put routes</p>
 
     <span class="hljs-keyword">return</span> model.fetch({
       <span class="hljs-built_in">require</span>: <span class="hljs-literal">true</span>
-    }).bind(<span class="hljs-keyword">this</span>).then(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span></pre></div></div>
+    }).bind(<span class="hljs-keyword">this</span>).then(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(model)</span> {</span></pre></div></div>
             
         </li>
         
         
-        <li id="section-22">
+        <li id="section-27">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-22">&#182;</a>
+                <a class="pilcrow" href="#section-27">&#182;</a>
               </div>
               <p>checks to see if the user owns this model</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">if</span> (model.get(model.userIdAttribute) !== req.user.id &amp;&amp; !req.admin) {
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">if</span> (model &amp;&amp; model.get(model.userIdAttribute) !== req.user.id &amp;&amp; !req.admin) {
         <span class="hljs-keyword">var</span> err = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">"Permission denied"</span>);
         err.code = <span class="hljs-number">403</span>;
         <span class="hljs-keyword">throw</span> err;
@@ -537,11 +630,11 @@ Adds <code>requireJSON</code> middleware for post/put routes</p>
         </li>
         
         
-        <li id="section-23">
+        <li id="section-28">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-23">&#182;</a>
+                <a class="pilcrow" href="#section-28">&#182;</a>
               </div>
               <h2 id="helpers">Helpers</h2>
 
@@ -550,11 +643,11 @@ Adds <code>requireJSON</code> middleware for post/put routes</p>
         </li>
         
         
-        <li id="section-24">
+        <li id="section-29">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-24">&#182;</a>
+                <a class="pilcrow" href="#section-29">&#182;</a>
               </div>
               
             </div>
@@ -562,6 +655,7 @@ Adds <code>requireJSON</code> middleware for post/put routes</p>
             <div class="content"><div class='highlight'><pre>
   setupModel: <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(req)</span> {</span>
     <span class="hljs-keyword">var</span> model = <span class="hljs-keyword">new</span> <span class="hljs-keyword">this</span>.model();
+    model.db = <span class="hljs-keyword">this</span>.database.mongo;
 
     <span class="hljs-keyword">if</span> (req.user) {
       model.user = req.user;
@@ -577,6 +671,7 @@ Adds <code>requireJSON</code> middleware for post/put routes</p>
 
   setupCollection: <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(req)</span> {</span>
     <span class="hljs-keyword">var</span> collection = <span class="hljs-keyword">new</span> <span class="hljs-keyword">this</span>.collection();
+    collection.db = <span class="hljs-keyword">this</span>.database.mongo;
 
     <span class="hljs-keyword">if</span> (req.user) {
       collection.user = req.user;

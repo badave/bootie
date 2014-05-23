@@ -79,11 +79,6 @@
               </a>
             
               
-              <a class="source" href="renderer.html">
-                renderer.js
-              </a>
-            
-              
               <a class="source" href="router.html">
                 router.js
               </a>
@@ -165,6 +160,7 @@
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> _ = <span class="hljs-built_in">require</span>(<span class="hljs-string">'lodash'</span>);
+<span class="hljs-keyword">var</span> Backbone = <span class="hljs-built_in">require</span>(<span class="hljs-string">'backbone'</span>);
 <span class="hljs-keyword">var</span> redis = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>);
 <span class="hljs-keyword">var</span> Mongo = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./mongo'</span>);</pre></div></div>
             
@@ -181,60 +177,60 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> Database = module.exports = Air.Backbone.Model.extend({
+            <div class="content"><div class='highlight'><pre>module.exports = Backbone.Model.extend({
   className: <span class="hljs-string">"Database"</span>,
+  debug: <span class="hljs-literal">false</span>,
+
+  defaults: <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
+    <span class="hljs-keyword">return</span> {
+      mongo: {
+        url: <span class="hljs-literal">null</span>
+      },
+      redis: {
+        port: <span class="hljs-number">6379</span>,
+        host: <span class="hljs-literal">null</span>,
+        auth: <span class="hljs-literal">null</span>
+      }
+    };
+  },
 
   initialize: <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
-    <span class="hljs-keyword">this</span>.setupMongo();
-    <span class="hljs-keyword">this</span>.setupRedis();
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.get(<span class="hljs-string">'mongo'</span>).url) {
+      <span class="hljs-keyword">this</span>.setupMongo(<span class="hljs-keyword">this</span>.get(<span class="hljs-string">'mongo'</span>).url);
+    }
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.get(<span class="hljs-string">'redis'</span>).host) {
+      <span class="hljs-keyword">this</span>.setupRedis(<span class="hljs-keyword">this</span>.get(<span class="hljs-string">'redis'</span>).port, <span class="hljs-keyword">this</span>.get(<span class="hljs-string">'redis'</span>).host, <span class="hljs-keyword">this</span>.get(<span class="hljs-string">'redis'</span>).auth);
+    }
   },
 
   setupRedis: <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
-    <span class="hljs-keyword">var</span> cache = redis.createClient(config.redis.cache.port, config.redis.cache.host);
-    cache.auth(config.redis.cache.auth);
-    <span class="hljs-keyword">this</span>.redis_cache = cache;
+    <span class="hljs-keyword">var</span> cache = redis.createClient(port, host);
+    cache.auth(auth);
+    <span class="hljs-keyword">this</span>.redis = cache;
+
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.debug) {
+      console.log(<span class="hljs-string">"Redis %d connected to url: %s@%:s"</span>, process.pid, auth, host + port)
+    }
   },
 
-  setupMongo: <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
-    <span class="hljs-keyword">this</span>.primary = <span class="hljs-keyword">new</span> Mongo(config.mongodb.cujo);
-    <span class="hljs-keyword">this</span>.primary.name = <span class="hljs-string">"cujo_air"</span>;
-    <span class="hljs-keyword">this</span>.setupEvents(<span class="hljs-keyword">this</span>.primary);
+  setupMongo: <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(url)</span> {</span>
+    <span class="hljs-keyword">this</span>.mongo = <span class="hljs-keyword">new</span> Mongo(url);
+    <span class="hljs-keyword">this</span>.mongo.name = url;
+    <span class="hljs-keyword">this</span>.setupEvents(<span class="hljs-keyword">this</span>.mongo);
   },
 
   setupEvents: <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(db)</span> {</span>
-    db.on(<span class="hljs-string">"connect"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(url)</span> {</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-7">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-7">&#182;</a>
-              </div>
-              <p>_.info(“Mongo %d connected to url: %s - %s”, config.pid, url, db.name);</p>
+    db.on(<span class="hljs-string">"connect"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(url)</span> {</span>
+      <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.debug) {
+        console.log(<span class="hljs-string">"Mongo %d connected to url: %s - %s"</span>, process.pid, url);
+      }
+    }.bind(<span class="hljs-keyword">this</span>));
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    });
-
-    db.on(<span class="hljs-string">"error"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(error)</span> {</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-8">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-8">&#182;</a>
-              </div>
-              <p>_.warn(“Mongo %d had an error: %s - %s”, config.pid, error.message, db.name);</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    });
+    db.on(<span class="hljs-string">"error"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(error)</span> {</span>
+      <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.debug) {
+        console.error(<span class="hljs-string">"Mongo %d had an error at url: %s - %s"</span>, process.pid, url, error.message)
+      }
+    }.bind(<span class="hljs-keyword">this</span>));
   }
 });</pre></div></div>
             

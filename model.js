@@ -17,6 +17,14 @@ module.exports = Backbone.Model.extend({
   // The mongodb collection name
   urlRoot: "models",
 
+  // Private attributes to be included in the response
+  // Should set this once in a base model that other models inherit from
+  privateAttributes: [],
+
+  // Attributes to be included in the response
+  // Should be optionally set explicitly in each model
+  publicAttributes: [],
+
   // Copied from Backbone
   parse: function(resp, options) {
     // Mongodb `create` returns an array of one document
@@ -24,6 +32,21 @@ module.exports = Backbone.Model.extend({
       resp = resp[0];
     }
     return resp;
+  },
+
+  // Picks an explicit set of attributes to include in the response
+  // There are 2 arrays (public and private) that determine which attributes are included
+  render: function() {
+    var json = this.toJSON();
+
+    // If there are no public attributes defined, return all
+    if (_.isEmpty(this.publicAttributes)) {
+      return this.toJSON();
+    }
+
+    // Otherwise, pick only the union of private and public attributes
+    var responseJSON = _.pick(json, _.union(this.privateAttributes, this.publicAttributes));
+    return responseJSON;
   },
 
   // TODO

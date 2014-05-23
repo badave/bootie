@@ -146,6 +146,8 @@ module.exports = Controller.extend({
           has_more: parseInt(collection.models.length) < parseInt(total)
         };
       });
+    }).then(function(count) {
+      return collection;
     }).then(this.nextThen(req, res, next)).catch(this.nextCatch(req, res, next));
   },
 

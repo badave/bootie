@@ -19,25 +19,33 @@ module.exports = Backbone.Model.extend({
   defaults: function() {
     return {
       mongo: {
-        url: "mongodb://localhost:27017/test"
+        url: null
       },
       redis: {
         port: 6379,
-        host: "localhost",
+        host: null,
         auth: null
       }
     };
   },
 
   initialize: function() {
-    this.setupMongo(this.get('mongo').url);
-    // this.setupRedis(this.get('redis').port, this.get('redis').host, this.get('redis').auth);
+    if (this.get('mongo').url) {
+      this.setupMongo(this.get('mongo').url);
+    }
+    if (this.get('redis').host) {
+      this.setupRedis(this.get('redis').port, this.get('redis').host, this.get('redis').auth);
+    }
   },
 
   setupRedis: function() {
     var cache = redis.createClient(port, host);
     cache.auth(auth);
     this.redis = cache;
+
+    if (this.debug) {
+      console.log("Redis %d connected to url: %s@%:s", process.pid, auth, host + port)
+    }
   },
 
   setupMongo: function(url) {

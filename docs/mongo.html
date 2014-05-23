@@ -79,11 +79,6 @@
               </a>
             
               
-              <a class="source" href="renderer.html">
-                renderer.js
-              </a>
-            
-              
               <a class="source" href="router.html">
                 router.js
               </a>
@@ -494,6 +489,7 @@ _.extend(Mongo.prototype, {
       .then(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(data)</span> {</span>
         <span class="hljs-keyword">if</span> (!data &amp;&amp; options.require) {
           <span class="hljs-keyword">var</span> requireErr = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">"Document not found."</span>)
+          requireErr.code = <span class="hljs-number">404</span>;
           <span class="hljs-keyword">throw</span> requireErr;
         }
 

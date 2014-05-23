@@ -20,8 +20,9 @@ describe("Collections", function() {
     db.connect();
     db.on("connect", function(url) {
       Model.prototype.db = db;
+      Model.prototype.urlRoot = "tests";
       Collection.prototype.db = db;
-      Collection.prototype.db.eraseCollection("models");
+      Collection.prototype.db.eraseCollection("tests");
       done();
     });
   });
