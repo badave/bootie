@@ -24,7 +24,8 @@
     "hbs": "^2.6.0",
     "request": "^2.36.0",
     "redis": "^0.10.3",
-    "iron_mq": "^0.2.3"
+    "iron_mq": "^0.2.3",
+    "express": "^4.3.0"
   },
   "devDependencies": {
     "mocha": "^1.19.0",

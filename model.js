@@ -28,6 +28,15 @@ module.exports = Backbone.Model.extend({
     return resp;
   },
 
+  // TODO
+  // https://github.com/jsantell/backbone-promised/blob/master/index.js
+  // fetch: function(options) {
+  //   return new Promise(function(resolve, reject) {
+  //     resolve(Backbone.Model.prototype.fetch.call(this, options));
+  //   }.bind(this));
+  // },
+
+
   // Override the backbone sync method for use with mongodb
   // options contains 2 callbacks: `success` and `error`
   // Both callbacks have parameters (model, resp, options)
