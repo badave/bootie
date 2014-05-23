@@ -68,6 +68,22 @@ describe("Collections", function() {
     });
   });
 
+  it("should fetch with promise", function(done) {
+    var collection = new Collection();
+    collection.fetch()
+      .then(function(resp) {
+        collection.length.should.equal(2);
+        (collection.at(0) instanceof Model).should.be.true;
+        (collection.at(1) instanceof Model).should.be.true;
+        collection.at(0).get("name").should.equal("Pedro Sanchez");
+        collection.at(1).get("name").should.equal("Jack Dagnels");
+        done();
+      })
+      .catch(function(err) {
+        done();
+      });
+  });
+
   it("should fetch with limit and skip", function(done) {
     var collection = new Collection();
     collection.fetch({

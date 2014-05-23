@@ -36,6 +36,7 @@ module.exports = Backbone.Collection.extend({
     }
     var op = this[method].call(this, model, options);
     model.trigger("request", model, op, options);
+    return op;
   },
 
   // Takes the mongodb response and calls the Backbone success method
@@ -60,7 +61,7 @@ module.exports = Backbone.Collection.extend({
 
     // Build query with optional: limit, skip, sort
     var mongoOptions = _.pick(options, ["limit", "skip", "sort"]) || {};
-    this.db.find(this.model.prototype.urlRoot, query, mongoOptions, this.wrapResponse(options));
+    return this.db.find(this.model.prototype.urlRoot, query, mongoOptions, this.wrapResponse(options));
   }
 
 });
