@@ -29,7 +29,7 @@ module.exports = Controller.extend({
   crud: ["C", "R", "O", "U", "D"],
 
   basePath: function() {
-    return "/" + this.version + this.path + this.resources;
+    return this.path + this.resources;
   },
 
   setupRoutes: function() {
@@ -70,7 +70,7 @@ module.exports = Controller.extend({
           break;
         case 'D':
           // Destroy
-          this.routes.del[basePath + "/:id"] = {
+          this.routes.delete[basePath + "/:id"] = {
             action: this.destroy,
             middleware: [this.requireUser.bind(this)]
           };

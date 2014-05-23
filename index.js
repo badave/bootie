@@ -9,7 +9,7 @@
 // Only used by V2
 // All your modules are belong to us.
 // Export to global
-var Bootie = global.Bootie = {};
+var Bootie = {};
 
 Bootie.Backbone = require('backbone');
 Bootie._ = require('lodash');
@@ -21,6 +21,8 @@ Bootie._ = require('lodash');
 
 // All external libraries
 // ---
+
+Bootie.Router = require('./router');
 
 // PeeGee is the Postgres database driver.
 // [Annotated Source](peegee.html)
@@ -65,7 +67,7 @@ Bootie.Job = require('./job');
 
 // Mixin Backbone.Events so that Bootie can be a pubsub bus
 Bootie._.extend(Bootie.prototype, Bootie.Backbone.Events, {
-  VERSION: '0.1.4'
+  VERSION: '0.1.5'
 });
 
 // Export to the world

@@ -35,8 +35,6 @@
 //         app[method](path, controller.pre || [], options.middleware || [], controller.before || [], function(req, res, next) {
 //           options.action.call(controller, req, res, next);
 //         }, controller.after || [], controller.post || []);
-
-//         _.verbose(controller.className.green + " [".magenta + method.toUpperCase().magenta + "] ".magenta + path.cyan);
 //       });
 //     });
 //   });
@@ -56,10 +54,6 @@ var Collection = require('./collection');
 module.exports = Backbone.Model.extend({
   className: "BaseController",
 
-  /** Define a version that will be used in the base url path */
-  version: "v2",
-
-  /** Define a path to be appended after the version */
   path: "/",
 
   queryParams: function() {
@@ -68,14 +62,12 @@ module.exports = Backbone.Model.extend({
 
   /** Called after the constructor */
   initialize: function() {
-    _.verbose("%s#initialize", this.className);
-
     // Routes
     this.routes = {
       get: {},
       post: {},
       put: {},
-      del: {}
+      delete: {}
     };
 
     // Middleware(s)
@@ -97,14 +89,13 @@ module.exports = Backbone.Model.extend({
    * @return {string} computed base path (i.e. http://localhost/v2)
    */
   basePath: function() {
-    return "/" + this.version + this.path;
+    return this.path;
   },
 
   /**
    * Setup routes that this controller should handle
    */
   setupRoutes: function() {
-    _.verbose("%s#setupRoutes", this.className);
   },
 
   setupPreMiddleware: function() {},
@@ -114,17 +105,13 @@ module.exports = Backbone.Model.extend({
    * Setup middleware that should run before the route
    * i.e. this.before.push(this.fakeBeforeMiddleware.bind(this))
    */
-  setupBeforeMiddleware: function() {
-    _.verbose("%s#setupBeforeMiddleware", this.className);
-  },
+  setupBeforeMiddleware: function() {},
 
   /**
    * Setup middleware that should run after the route
    * i.e. this.after.push(this.fakeAfterMiddleware.bind(this))
    */
   setupAfterMiddleware: function() {
-    _.verbose("%s#setupAfterMiddleware", this.className);
-
     this.after.push(this.successResponse.bind(this));
     this.after.push(this.errorResponse.bind(this));
     this.after.push(this.finalResponse.bind(this));
@@ -382,7 +369,6 @@ module.exports = Backbone.Model.extend({
     var access_token = this.accessTokenFromRequest(req);
 
     if (!access_token) {
-      _.verbose("Unauthenticated");
       return next();
     }
 
@@ -417,7 +403,6 @@ module.exports = Backbone.Model.extend({
       })
       .otherwise(function(err) {
         if (err === "Error: EmptyResponse") {
-          _.verbose("Unauthenticated");
           return next();
         }
 
