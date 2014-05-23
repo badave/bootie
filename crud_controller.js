@@ -90,14 +90,6 @@ module.exports = Controller.extend({
     return next(err);
   },
 
-  setupBeforeMiddleware: function() {
-    Controller.prototype.setupBeforeMiddleware.call(this);
-  },
-
-  setupAfterMiddleware: function() {
-    Controller.prototype.setupAfterMiddleware.call(this);
-  },
-
   // CRUD functions
   find: function(req, res, next, options) {
     var collection = new this.collection();

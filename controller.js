@@ -1,9 +1,9 @@
 "use strict";
 
-// What is BaseController?
+// What is Controller?
 // ---
 
-// BaseController helps facilitate routing via express by providing controllers that react to route functions
+// Controller helps facilitate routing via express by providing controllers that react to route functions
 // 
 // For example, a route to `/users/:id` would be handled by a `UsersController` with function `findOne`
 // 
@@ -12,33 +12,6 @@
 // Also provides a mechanism to define before and after middleware per controller
 // 
 // Finally, it also provides response and error handling default middleware
-
-// **More documentation TBD**
-// 
-// An example configuration `routes.js` file
-// (function() {
-//   var Controllers = {};
-
-//   Controllers.users = require('./controllers/users');
-//   Controllers.orders = require('./controllers/orders');
-
-//   _.each(Controllers, function(Controller) {
-//     var controller = new Controller();
-//     var routes = controller.routes;
-
-//     _.each(routes, function(route, method) {
-//       _.each(route, function(options, path) {
-//         if (!options.action) {
-//           return _.warn("route: [" + method + "]", path, ' is not defined');
-//         }
-
-//         app[method](path, controller.pre || [], options.middleware || [], controller.before || [], function(req, res, next) {
-//           options.action.call(controller, req, res, next);
-//         }, controller.after || [], controller.post || []);
-//       });
-//     });
-//   });
-// });
 
 // TODO
 // ---
@@ -52,15 +25,17 @@ var Model = require('./model');
 var Collection = require('./collection');
 
 module.exports = Backbone.Model.extend({
-  className: "BaseController",
+  className: "Controller",
 
+  // Root path url for routes
   path: "/",
 
+  // Database query parameters/filters
   queryParams: function() {
     return {};
   },
 
-  /** Called after the constructor */
+  // Called after the constructor
   initialize: function() {
     // Routes
     this.routes = {
@@ -71,10 +46,10 @@ module.exports = Backbone.Model.extend({
     };
 
     // Middleware(s)
-    this.pre = [];
-    this.before = [];
-    this.after = [];
-    this.post = [];
+    this.pre = []; // run before route middleware
+    this.before = []; // run after route middleware but before route handler
+    this.after = []; // run after route handler
+    this.post = []; // run after everything else (internal use)
 
     // Setup
     this.setupPreMiddleware();
@@ -86,7 +61,6 @@ module.exports = Backbone.Model.extend({
 
   /**
    * Computes the base path for the controller
-   * @return {string} computed base path (i.e. http://localhost/v2)
    */
   basePath: function() {
     return this.path;
@@ -95,27 +69,182 @@ module.exports = Backbone.Model.extend({
   /**
    * Setup routes that this controller should handle
    */
-  setupRoutes: function() {
-  },
-
-  setupPreMiddleware: function() {},
-  setupPostMiddleware: function() {},
+  setupRoutes: function() {},
 
   /**
-   * Setup middleware that should run before the route
-   * i.e. this.before.push(this.fakeBeforeMiddleware.bind(this))
+   * Setup middleware that should run before the route middleware
+   * i.e. this.before.push(this.fakePreMiddleware)
+   */
+  setupPreMiddleware: function() {},
+
+  /**
+   * Setup middleware that should run before the route handler
+   * i.e. this.before.push(this.fakeBeforeMiddleware)
    */
   setupBeforeMiddleware: function() {},
 
   /**
-   * Setup middleware that should run after the route
-   * i.e. this.after.push(this.fakeAfterMiddleware.bind(this))
+   * Setup middleware that should run after the route handler
+   * i.e. this.after.push(this.fakeAfterMiddleware)
    */
-  setupAfterMiddleware: function() {
-    this.after.push(this.successResponse.bind(this));
-    this.after.push(this.errorResponse.bind(this));
-    this.after.push(this.finalResponse.bind(this));
+  setupAfterMiddleware: function() {},
+
+  /**
+   * Setup middleware that should run after everything else (internal use)
+   * i.e. this.post.push(this.fakePostMiddleware)
+   */
+  setupPostMiddleware: function() {
+    this.post.push(this.successResponse);
+    this.post.push(this.errorResponse);
+    this.post.push(this.finalResponse);
   },
+
+
+  // Middleware
+  // ---
+
+  requireAdmin: function(req, res, next) {
+    var err;
+    if (!req.admin) {
+      err = new Error("Admin required.");
+      err.code = 401;
+    }
+    next(err);
+  },
+
+  requireUser: function(req, res, next) {
+    var err;
+    if (!req.user) {
+      err = new Error("User required.");
+      err.code = 401;
+    }
+    next(err);
+  },
+
+  requireJSON: function(req, res, next) {
+    var err;
+    if (!req.is('json')) {
+      err = new Error("Please set your request headers to contain: `Content-Type: application/json`.");
+      err.code = 400;
+    }
+    next(err);
+  },
+
+  // Promise friendly next()
+  nextThen: function(req, res, next) {
+    return function(modelOrCollection) {
+      this.prepareResponse(modelOrCollection, req, res, next);
+    }.bind(this);
+  },
+
+  // Promise friendly next(err)
+  nextCatch: function(req, res, next) {
+    return function(err) {
+      next(err);
+    }.bind(this);
+  },
+
+  // This method can be overridden to customize the response
+  prepareResponse: function(modelOrCollection, req, res, next) {
+    if (!modelOrCollection) {
+      return next();
+    }
+
+    if (modelOrCollection instanceof Model) {
+      // Data is a Model
+      res.data = this.renderModel(modelOrCollection);
+    } else if (modelOrCollection instanceof Collection) {
+      // Data is a Collection
+      res.data = this.renderCollection(modelOrCollection);
+    } else {
+      // Data is raw
+      res.data = modelOrCollection;
+    }
+
+    return next();
+  },
+
+  // Default middleware for handling successful responses
+  successResponse: function(req, res, next) {
+    // Default to 200, but allow override (e.g. 201)
+    res.code = res.code || 200;
+
+    var data = res.data || {};
+    var envelope = {
+      meta: {
+        code: res.code
+      },
+      data: data
+    };
+
+    // Optional paging meta
+    if (res.paging) {
+      envelope.meta.paging = res.paging;
+    }
+
+    res.data = envelope;
+    next();
+  },
+
+  // Default middleware for handling error responses
+  errorResponse: function(err, req, res, next) {
+    // Default to 500, but allow override
+    res.code = res.code || err.code || 500;
+
+    var data = res.data || {};
+    var envelope = {
+      meta: {
+        code: res.code,
+        error: err.message
+      },
+      data: data
+    };
+
+    // TODO
+    // We should log these errors somewhere remotely
+    
+    res.data = envelope;
+    next();
+  },
+
+  // Final middleware for handling all responses
+  finalResponse: function(req, res, next) {
+    // If we timed out before managing to respond, don't send the response
+    if (res.headerSent) {
+      return;
+    }
+
+    // Respond with correct format, defaulting to json
+    res.fmt = res.fmt || 'json';
+    if (res.fmt === 'json') {
+      // json
+      res.jsonp(res.code, res.data);
+    } else if (res.fmt === 'xml') {
+      // xml
+      res.set('Content-Type', 'application/xml; charset=utf-8');
+      res.send(res.code, res.data);
+    } else {
+      // text or html
+      res.send(res.code, res.data);
+    }
+  },
+
+
+  ///////////////
+  // Renderers //
+  ///////////////
+  
+  renderModel: function(model) {
+    return model.render().content();
+  },
+
+  renderCollection: function(collection) {
+    return collection.map(function(model) {
+      return model.render().content();
+    });
+  },
+
+
 
 
   /////////////
@@ -296,37 +425,11 @@ module.exports = Backbone.Model.extend({
     };
   },
 
-  requireAdmin: function(req, res, next) {
-    // TODO UserModel
-    if (!req.admin) {
-      var err = new Error("=== [ERROR] Unauthorized ===");
-      err.code = 401;
-      return next(err);
-    }
 
-    next();
-  },
-
-  requireUser: function(req, res, next) {
-    // TODO UserModel
-    if (!req.user) {
-      var err = new Error("=== [ERROR] Unauthorized ===");
-      err.code = 401;
-      return next(err);
-    }
-
-    next();
-  },
-
-  requireJSON: function(req, res, next) {
-    var err;
-    if (!req.is('json')) {
-      err = new Error("Please set your Request Headers to contain: Content-Type: application/json");
-    }
-    return next(err);
-  },
-
-  // Get access_token from req
+  // Get `access_token` from `req`
+  // Attempts to get an `access_token` from the `Authorization` header
+  // Uses several fallbacks to read the token
+  // Also falls back to reading `access_token` from the query string
   accessTokenFromRequest: function(req) {
     var access_token;
 
@@ -361,240 +464,6 @@ module.exports = Backbone.Model.extend({
     }
 
     return access_token;
-  },
-
-  authenticate: function(req, res, next) {
-    var UserModel = require('../models/v2/user');
-
-    var access_token = this.accessTokenFromRequest(req);
-
-    if (!access_token) {
-      return next();
-    }
-
-    var user = new UserModel({
-      access_token: access_token
-    });
-
-    user.fetch({
-      require: true
-    })
-      .then(function() {
-        req.user = user.attributes;
-        // TODO Make UserModel
-        req.user.id = user.attributes._id;
-        req.user_model = user;
-
-        if (user.get('admin')) {
-          req.admin = true;
-
-          if (req.query.iddqd) {
-            req.god = true;
-          }
-        }
-
-        _.info("User authenticated with email: %s and token: %s and admin: %s".green, user.get('email'), access_token, user.get('admin'));
-
-        mixpanel.people.set(user.get('_id'), {
-          "$ip": req.ip
-        });
-
-        return next();
-      })
-      .otherwise(function(err) {
-        if (err === "Error: EmptyResponse") {
-          return next();
-        }
-
-        // if there is an error, will catch
-        return next(err);
-      });
-  },
-  // Post route default middleware for handling successful responses
-  successResponse: function(req, res, next) {
-    var envelope = {};
-    envelope.meta = {
-      code: 200
-    };
-
-    // // Add Pagination header
-    // if (res.paging) {
-    //   // _.inspect(res.paging);
-    //   res.set('Access-Control-Expose-Headers', 'X-CELERY-TOTAL, X-CELERY-COUNT, X-CELERY-LIMIT, X-CELERY-OFFSET, X-CELERY-HAS-MORE');
-    //   res.set('X-CELERY-TOTAL', res.paging.total);
-    //   res.set('X-CELERY-COUNT', res.paging.count);
-    //   res.set('X-CELERY-LIMIT', res.paging.limit);
-    //   res.set('X-CELERY-OFFSET', res.paging.offset);
-    //   res.set('X-CELERY-HAS-MORE', res.paging.has_more);
-    // }
-
-    if (res.paging) {
-      envelope.meta = {
-        paging: res.paging
-      };
-    }
-
-    envelope.data = res.data || {};
-
-    res.data = envelope;
-    next();
-  },
-
-  // Post route default middleware for handling error responses
-  errorResponse: function(err, req, res, next) {
-    res.code = res.code || err.code || 500;
-
-    var envelope = {};
-    res.data = res.data || {};
-
-    envelope.meta = {};
-
-    envelope.meta.error = {
-      "message": err.message,
-      "code": err.code
-    };
-
-    // To be backwards compatible with Celery, err.message should come back on data
-    // This can be taken out in the near future when Celery's old dashboard is gone
-    envelope.data = err.message;
-
-    res.data = envelope;
-
-    _.error("Controller Code: %d, Error: %s", res.code, err.message, err.stack);
-    next();
-  },
-
-  // Final middleware for handling all responses
-  finalResponse: function(req, res, next) {
-    // If we timed out before managing to respond, don't send the response
-    if (res.headerSent) {
-      _.error("Request timed out before response was sent!");
-      return;
-    }
-
-    res.code = res.code || 200;
-
-    // Respond with correct format, defaulting to json
-    res.fmt = res.fmt || 'json';
-    if (res.fmt === 'json') {
-      res.jsonp(res.code, res.data);
-    } else if (res.fmt === 'xml') {
-      res.set('Content-Type', 'application/xml; charset=utf-8');
-      res.send(res.code, res.data);
-    } else {
-      // text or html
-      res.send(res.code, res.data);
-    }
-  },
-
-  ///////////////
-  // Renderers //
-  ///////////////
-  renderModel: function(model) {
-    return model.render()
-      .content();
-  },
-
-  renderCollection: function(collection) {
-    // TODO paging
-    return collection.map(function(model) {
-      return model.render()
-        .content();
-    });
-  },
-
-  renderContent: function(model) {
-    return model.render()
-      .content();
-  },
-
-  // Helpers
-  // This method can be overridden to customize the response
-  prepareResponse: function(modelOrCollection, req, res, next) {
-    // console.log("\n=== BEGIN OUTPUT ===\n");
-    // console.log(modelOrCollection);
-    // console.log("\n=== END OUTPUT ===\n");
-    if (!modelOrCollection) {
-      return next();
-    }
-
-    if (modelOrCollection instanceof Model) {
-      res.data = this.renderModel(modelOrCollection);
-      res.resource = this.resource;
-    } else if (modelOrCollection instanceof Collection || modelOrCollection instanceof Array) {
-      res.data = this.renderCollection(modelOrCollection);
-      res.resource = this.resources;
-    } else if (modelOrCollection.toJSON) {
-      _.info("Sending using toJSON for object: %s (please consider adding a renderer to the model or collection)", modelOrCollection.name);
-      // TODO: arpan default this to base view, right now its a temp hack
-      res.data = modelOrCollection.toJSON();
-    }
-
-    return next();
-  },
-
-  successHandler: function(req, res, next) {
-    var that = this;
-    return function(model) {
-      // console.log("sending response *********************************************************");
-      return that.prepareResponse(model, req, res, next);
-    };
-  },
-
-  errorHandler: function(req, res, next) {
-    var that = this;
-    return function(err) {
-      that.respondError(err, req, res, next);
-    };
-  },
-
-  respondError: function(err, req, res, next) {
-    var match, message;
-
-    if (!err || err.message === "EmptyResponse") {
-      err = new Error("Resource Not Found");
-      err.code = 404;
-    }
-
-    if (/duplicate key value violates unique constraint/.test(err.message)) {
-      message = "Resource must be unique";
-
-      if (/sku/.test(err.message)) {
-        message += ": SKU is a duplicate";
-      } else if (/email/.test(err.message)) {
-        message = "Email has already been taken";
-      } else if (match = err.message.match(/duplicate key value violates unique constraint \"([a-zA-Z0-9\_]+)\"/)) {
-        message += ": " + match[1];
-      }
-
-      err = new Error(message);
-      err.code = 409;
-    }
-
-    if (/null value in column/.test(err.message)) {
-      message = "Required field not specified";
-
-      if (match = err.message.match(/null value in column \"([a-zA-Z0-9\_]+)\"/)) {
-        message += ": " + match[1];
-      }
-
-      err = new Error(message);
-      err.code = 412;
-    }
-
-    // mongodb errors
-    if (/E11000 duplicate key error index/.test(err.message)) {
-      message = "Resource must be unique";
-
-      if (/email/.test(err.message)) {
-        message = "Email has already been taken";
-      }
-
-      err = new Error(message);
-      err.code = 409;
-    }
-
-    return next(err);
   }
 
 });

@@ -1,3 +1,5 @@
+"use strict";
+
 var _ = require('lodash');
 var express = require('express');
 
@@ -42,9 +44,13 @@ module.exports = function(options) {
           }
 
           // Hook up the route/path/method to the controller action and middleware
-          router[method](path, controller.pre || [], routeOptions.middleware || [], controller.before || [], function(req, res, next) {
+          var pre = _.invoke(controller.pre, 'bind', controller);
+          var before = _.invoke(controller.before, 'bind', controller);
+          var after = _.invoke(controller.after, 'bind', controller);
+          var post = _.invoke(controller.post, 'bind', controller);
+          router[method](path, pre || [], routeOptions.middleware || [], before || [], function(req, res, next) {
             routeOptions.action.call(controller, req, res, next);
-          }, controller.after || [], controller.post || []);
+          }, after || [], post || []);
 
           // Add route to set of active routes
           router.routes.push({
