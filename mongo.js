@@ -97,7 +97,7 @@ _.extend(Mongo.prototype, {
     _.each(obj, function(val, key) {
       if (_.isString(val)) {
         if (this.isValidObjectID(val)) {
-          obj[key] = ObjectID(val);
+          obj[key] = new ObjectID(val);
         }
       } else if (_.isObject(val)) {
         if (val['$oid']) {
