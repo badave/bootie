@@ -12,11 +12,12 @@ module.exports = Backbone.Model.extend({
 
   // mongodb id attribute, usually `_id`
   idAttribute: "_id",
+  userIdAttribute: "user_id",
 
-  // the mongodb connection object
+  // The mongodb connection object
   db: null,
 
-  // the mongodb collection name
+  // The mongodb collection name
   urlRoot: "models",
 
   // Copied from Backbone
@@ -131,13 +132,13 @@ module.exports = Backbone.Model.extend({
   },
 
   // Finds a single mongodb document
-  // If `options.where` is provided and is an object,
+  // If `options.query` is provided and is an object,
   // it is used as the query
   read: function(model, options) {
     var query = {};
-    if (_.isObject(options.where)) {
-      // Build query against where query
-      query = options.where;
+    if (_.isObject(options.query)) {
+      // Build query
+      query = options.query;
     } else {
       if (model.isNew()) {
         // If no ID in query, error out
@@ -148,9 +149,12 @@ module.exports = Backbone.Model.extend({
 
       // Build query against the model's id
       query[this.idAttribute] = model.id;
+      if (model.has(this.userIdAttribute)) {
+        query[this.userIdAttribute] = model.get(this.userIdAttribute);
+      }
     }
-
-    return this.db.findOne(this.urlRoot, query, this.wrapResponse(options));
+    var mongoOptions = _.pick(options, ["require"]) || {};
+    return this.db.findOne(this.urlRoot, query, mongoOptions, this.wrapResponse(options));
   }
 
 });

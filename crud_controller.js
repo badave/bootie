@@ -5,7 +5,7 @@
 
 // CrudController helps making CRUD routing easy by providing a controller that automatically maps all CRUD routes
 // 
-// See documentation for [Controller](base_controller.html)
+// See documentation for [Controller](controller.html)
 
 // TODO
 // ---
@@ -15,64 +15,72 @@
 // ---
 var _ = require('lodash');
 var Controller = require('./controller');
+var Model = require("./model");
+var Collection = require("./collection");
 
 module.exports = Controller.extend({
   className: "CrudController",
+  debug: false,
 
-  // Singular and Plural forms of the database table/collection
-  resources: 'models',
-  resource: 'model',
+  // The mongodb collection name
+  urlRoot: 'models',
 
-  model: null,
-  collection: null,
+  model: Model,
+  collection: Collection,
 
+  // Available controller actions (see `setupRoutes` for more info)
   crud: ["C", "R", "O", "U", "D"],
 
+  // Base path appends `urlRoot`
   basePath: function() {
-    return this.path + this.resources;
+    return this.path + "/" + this.urlRoot;
   },
 
+  // Sets up default CRUD routes
+  // Adds `requireUser` middleware to all routes
+  // Adds `requireJSON` middleware for post/put routes
   setupRoutes: function() {
+    // Make sure to call `super` as a best practice when overriding
     Controller.prototype.setupRoutes.call(this);
 
     var basePath = _.result(this, "basePath");
 
     // Setup CRUD routes
-    _.each(this.crud, function(crud) {
-      switch (crud) {
+    _.each(this.crud, function(action) {
+      switch (action) {
         case 'C':
           // Create
           this.routes.post[basePath] = {
             action: this.create,
-            middleware: [this.requireUser.bind(this), this.requireJSON.bind(this)]
+            middleware: [this.requireUser, this.requireJSON]
           };
           break;
         case 'R':
           // Find
           this.routes.get[basePath] = {
             action: this.find,
-            middleware: [this.requireUser.bind(this)]
+            middleware: [this.requireUser]
           };
           break;
         case 'O':
           // FindOne
           this.routes.get[basePath + "/:id"] = {
             action: this.findOne,
-            middleware: [this.requireUser.bind(this)]
+            middleware: [this.requireUser]
           };
           break;
         case 'U':
           // Update
           this.routes.put[basePath + "/:id"] = {
             action: this.update,
-            middleware: [this.requireUser.bind(this), this.requireJSON.bind(this)]
+            middleware: [this.requireUser, this.requireJSON]
           };
           break;
         case 'D':
           // Destroy
           this.routes.delete[basePath + "/:id"] = {
             action: this.destroy,
-            middleware: [this.requireUser.bind(this)]
+            middleware: [this.requireUser]
           };
           break;
         default:
@@ -81,21 +89,12 @@ module.exports = Controller.extend({
     }.bind(this));
   },
 
-  requireJSON: function(req, res, next) {
-    var err;
-    // Enforce Content-Type: application/json for all POST and PUT requests
-    if (!req.is('json')) {
-      err = new Error("Please set your Request Headers to contain: Content-Type: application/json");
-    }
-    return next(err);
-  },
-
   // CRUD functions
   find: function(req, res, next, options) {
-    var collection = new this.collection();
+    var collection = this.setupCollection(req);
 
     var qo = this.parseQueryString(req);
-    qo.query.user_id = req.user_model.id;
+    qo.query[collection.model.prototype.userIdAttribute] = req.user.id;
 
     if (!_.isEmpty(options)) {
       _.extend(qo.query, options);
@@ -103,28 +102,20 @@ module.exports = Controller.extend({
 
     // If godmode is on, return list of ALL orders
     if (req.god) {
-      delete qo.query.user_id;
+      delete qo.query[collection.model.prototype.userIdAttribute];
     }
 
-    return collection.fetch(qo)
-      .bind(this)
-      .then(function() {
-        return collection.count(qo)
-          .tap(function(total) {
-            res.paging = {
-              total: parseInt(total),
-              count: parseInt(collection.models.length),
-              limit: parseInt(qo.limit),
-              offset: parseInt(qo.skip),
-              has_more: parseInt(collection.models.length) < parseInt(total)
-            };
-          });
-      })
-      .then(function() {
-        return collection;
-      })
-      .then(this.successHandler(req, res, next))
-      .otherwise(this.errorHandler(req, res, next));
+    return collection.fetch(qo).bind(this).then(function() {
+      return collection.count(qo).tap(function(total) {
+        res.paging = {
+          total: parseInt(total),
+          count: parseInt(collection.models.length),
+          limit: parseInt(qo.limit),
+          offset: parseInt(qo.skip),
+          has_more: parseInt(collection.models.length) < parseInt(total)
+        };
+      });
+    }).then(this.nextThen(req, res, next)).catch(this.nextCatch(req, res, next));
   },
 
   findOne: function(req, res, next) {
@@ -132,22 +123,20 @@ module.exports = Controller.extend({
 
     return model.fetch({
       require: true
-    })
-      .tap(function(model) {
-        if (model.get('user_id') !== req.user_model.id && !req.user_model.isAdmin()) {
-          var err = new Error("Permission denied");
-          err.code = 403;
-          throw err;
-        }
-      })
-      .then(this.successHandler(req, res, next))
-      .otherwise(this.errorHandler(req, res, next));
+    }).bind(this).tap(function(model) {
+      if (model.get(model.userIdAttribute) !== req.user.id && !req.admin) {
+        var err = new Error("Permission denied");
+        err.code = 403;
+        throw err;
+      }
+    }).then(this.nextThen(req, res, next)).catch(this.nextCatch(req, res, next));
   },
 
   create: function(req, res, next) {
     var model = this.setupModel(req);
     model.setFromRequest(req.body);
-    return this.saveModel(model, req, res, next);
+
+    return model.save().bind(this).then(this.nextThen(req, res, next)).catch(this.nextCatch(req, res, next));
   },
 
   update: function(req, res, next) {
@@ -155,28 +144,17 @@ module.exports = Controller.extend({
 
     return model.fetch({
       require: true
-    })
-      .then(function() {
-        // checks to see if the user owns this model
-        if (model.get('user_id') !== req.user_model.id && !req.user_model.isAdmin()) {
-          var err = new Error("Permission denied");
-          err.code = 403;
-          throw err;
-        }
+    }).bind(this).then(function() {
+      // checks to see if the user owns this model
+      if (model.get(model.userIdAttribute) !== req.user.id && !req.admin) {
+        var err = new Error("Permission denied");
+        err.code = 403;
+        throw err;
+      }
 
-        model.setFromRequest(req.body);
-        // Save BaseModel
-        return model.save();
-      })
-      .then(this.successHandler(req, res, next))
-      .otherwise(this.errorHandler(req, res, next));
-  },
-
-  // Save model
-  saveModel: function(model, req, res, next) {
-    return model.save()
-      .then(this.successHandler(req, res, next))
-      .otherwise(this.errorHandler(req, res, next));
+      model.setFromRequest(req.body);
+      return model.save();
+    }).then(this.nextThen(req, res, next)).catch(this.nextCatch(req, res, next));
   },
 
   destroy: function(req, res, next) {
@@ -184,34 +162,27 @@ module.exports = Controller.extend({
 
     return model.fetch({
       require: true
-    })
-      .bind(this)
-      .then(function() {
-        // Create model instance
-        return model.destroy({
-          require: true
-        })
-          .then(this.successHandler(req, res, next));
-      })
-      .otherwise(this.errorHandler(req, res, next));
+    }).bind(this).then(function() {
+      return model.destroy({
+        require: true
+      }).then(this.nextThen(req, res, next));
+    }).catch(this.nextCatch(req, res, next));
   },
 
 
-  ///////////////////////
-  // BEFORE MIDDLEWARE //
-  ///////////////////////
+  // Helpers
+  // ---
 
   setupModel: function(req) {
     var model = new this.model();
 
     if (req.user) {
       model.user = req.user;
-      // TODO Make UserModel
-      model.setUserId(req.user.id);
+      model.set(this.model.prototype.userIdAttribute, req.user.id);
     }
 
     if (req.params.id) {
-      model.setId(req.params.id);
+      model.set(this.model.prototype.idAttribute, req.params.id);
     }
 
     return model;
@@ -222,8 +193,6 @@ module.exports = Controller.extend({
 
     if (req.user) {
       collection.user = req.user;
-      // TODO Make UserModel
-      collection.setUserId(req.user.id);
     }
 
     return collection;

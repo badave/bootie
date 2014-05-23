@@ -128,6 +128,43 @@ describe("Models", function() {
     });
   });
 
+  it("should fetch with require", function(done) {
+    var model = new Model({
+      _id: savedId
+    });
+    model.fetch({
+      // require: true,
+      success: function(model, resp, options) {
+        // console.log(resp)
+        model.get("name").should.equal("Hugh Bowner");
+        model.get("email").should.equal("hughbowner@gmail.com");
+        done();
+      }
+    });
+  });
+
+
+  it("should fetch with require with errors", function(done) {
+    var model = new Model({
+      _id: "epicfail"
+    });
+    model.fetch({
+      require: true,
+      success: function(model, resp, options) {
+        resp.should.equal(null);
+        done();
+      },
+      error: function(model, resp, options) {
+        (resp instanceof Error).should.be.true;
+        done();
+      }
+    }).catch(function(err) {
+      // Promise rejects even if error callback fires
+    });
+  });
+
+
+
   it("should fetch with promise", function(done) {
     var model = new Model({
       _id: savedId
@@ -169,10 +206,10 @@ describe("Models", function() {
     });
   });
 
-  it("should fetch with where with regex", function(done) {
+  it("should fetch with query with regex", function(done) {
     var model = new Model();
     model.fetch({
-      where: {
+      query: {
         name: /Hugh bowner/i,
         email: "hughbowner@gmail.com"
       },

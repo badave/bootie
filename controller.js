@@ -24,6 +24,7 @@ var Collection = require('./collection');
 
 module.exports = Backbone.Model.extend({
   className: "Controller",
+  debug: false,
 
   // Root path url for routes
   path: "/",
@@ -413,7 +414,7 @@ module.exports = Backbone.Model.extend({
     ];
 
     return {
-      query: query,
+      "query": query,
       "sort": sortOptions,
       "limit": parseInt(limit, 10),
       "skip": parseInt(skip, 10)

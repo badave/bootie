@@ -13,7 +13,6 @@ module.exports = Backbone.Collection.extend({
   // the mongodb connection object
   db: null,
 
-  // the mongodb collection name
   model: Model,
 
   // Copied from Backbone, not currently overridden
@@ -51,17 +50,41 @@ module.exports = Backbone.Collection.extend({
   },
 
   // Finds mongodb documents
-  read: function(model, options) {
+  read: function(collection, options) {
     var query = {};
 
     // Build query against where query
-    if (_.isObject(options.where)) {
-      query = options.where;
+    if (_.isObject(options.query)) {
+      query = options.query;
     }
 
     // Build query with optional: limit, skip, sort
     var mongoOptions = _.pick(options, ["limit", "skip", "sort"]) || {};
     return this.db.find(this.model.prototype.urlRoot, query, mongoOptions, this.wrapResponse(options));
+  },
+
+
+  // Count (not part of `sync`)
+  // success/error parameters are (resp)
+  count: function(options) {
+    options = options || {};
+
+    var success = options.success;
+    options.success = function(resp) {
+      if (success) {
+        success(resp);
+      }
+    };
+
+    var query = {};
+
+    // Build query against where query
+    if (_.isObject(options.query)) {
+      query = options.query;
+    }
+
+    var mongoOptions = {};
+    return this.db.count(this.model.prototype.urlRoot, query, mongoOptions, this.wrapResponse(options));
   }
 
 });

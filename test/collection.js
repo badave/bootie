@@ -129,10 +129,10 @@ describe("Collections", function() {
     });
   });
 
-  it("should fetch with where and regex", function(done) {
+  it("should fetch with query and regex", function(done) {
     var collection = new Collection();
     collection.fetch({
-      where: {
+      query: {
         name: /pedro sanchez/i
       },
       success: function(collection, resp, options) {
@@ -143,6 +143,32 @@ describe("Collections", function() {
       }
     });
   });
+
+  // Count
+
+  it("should count", function(done) {
+    var collection = new Collection();
+    collection.count({
+      success: function(resp) {
+        resp.should.equal(2);
+        done();
+      }
+    });
+  });
+
+  it("should count with promise", function(done) {
+    var collection = new Collection();
+    collection.count()
+      .then(function(resp) {
+        resp.should.equal(2);
+        done();
+      })
+      .catch(function(err) {
+        done();
+      });
+  });
+
+
 
   // After
 

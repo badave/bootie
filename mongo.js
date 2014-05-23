@@ -57,8 +57,7 @@ _.extend(Mongo.prototype, {
             callback && callback(null, db);
             return this._db;
           })
-          .caught(function(err) {
-            this.emit("error", err);
+          .catch(function(err) {
             this.connection = "disconnected";
             callback && callback(err);
             throw err;
@@ -78,11 +77,8 @@ _.extend(Mongo.prototype, {
         callback && callback(null, collection);
         return collection;
       })
-      .caught(function(err) {
-        this.emit("error", err);
-        if (callback) {
-          callback(err);
-        }
+      .catch(function(err) {
+        callback && callback(err);
         throw err;
       });
   }),
@@ -175,11 +171,8 @@ _.extend(Mongo.prototype, {
         callback && callback(null, cursor);
         return cursor;
       })
-      .caught(function(err) {
-        this.emit("error", err);
-        if (callback) {
-          callback(err);
-        }
+      .catch(function(err) {
+        callback && callback(err);
         throw err;
       });
   },
@@ -203,11 +196,8 @@ _.extend(Mongo.prototype, {
         callback && callback(null, count);
         return count;
       })
-      .caught(function(err) {
-        this.emit("error", err);
-        if (callback) {
-          callback(err);
-        }
+      .catch(function(err) {
+        callback && callback(err);
         throw err;
       });
   },
@@ -235,11 +225,8 @@ _.extend(Mongo.prototype, {
         callback && callback(null, obj);
         return obj;
       })
-      .caught(function(err) {
-        this.emit("error", err);
-        if (callback) {
-          callback(err);
-        }
+      .catch(function(err) {
+        callback && callback(err);
         throw err;
       });
   },
@@ -274,11 +261,8 @@ _.extend(Mongo.prototype, {
         callback && callback(null, obj);
         return obj;
       })
-      .caught(function(err) {
-        this.emit("error", err);
-        if (callback) {
-          callback(err);
-        }
+      .catch(function(err) {
+        callback && callback(err);
         throw err;
       });
   },
@@ -299,14 +283,16 @@ _.extend(Mongo.prototype, {
       })
       .then(this.uncast)
       .then(function(data) {
+        if (!data && options.require) {
+          var requireErr = new Error("Document not found.")
+          throw requireErr;
+        }
+
         callback && callback(null, data);
         return data;
       })
-      .caught(function(err) {
-        this.emit("error", err);
-        if (callback) {
-          callback(err);
-        }
+      .catch(function(err) {
+        callback && callback(err);
         throw err;
       });
   },
@@ -332,11 +318,8 @@ _.extend(Mongo.prototype, {
         callback && callback(null, data);
         return data;
       })
-      .caught(function(err) {
-        this.emit("error", err);
-        if (callback) {
-          callback(err);
-        }
+      .catch(function(err) {
+        callback && callback(err);
         throw err;
       });
   },
@@ -362,11 +345,8 @@ _.extend(Mongo.prototype, {
         callback && callback(null, data);
         return data;
       })
-      .caught(function(err) {
-        this.emit("error", err);
-        if (callback) {
-          callback(err);
-        }
+      .catch(function(err) {
+        callback && callback(err);
         throw err;
       });
   },
@@ -409,11 +389,8 @@ _.extend(Mongo.prototype, {
         callback && callback(null, data);
         return data;
       })
-      .caught(function(err) {
-        this.emit("error", err);
-        if (callback) {
-          callback(err);
-        }
+      .catch(function(err) {
+        callback && callback(err);
         throw err;
       });
   },
@@ -437,11 +414,8 @@ _.extend(Mongo.prototype, {
         callback && callback(null, data);
         return data;
       })
-      .caught(function(err) {
-        this.emit("error", err);
-        if (callback) {
-          callback(err);
-        }
+      .catch(function(err) {
+        callback && callback(err);
         throw err;
       });
   },
@@ -471,11 +445,8 @@ _.extend(Mongo.prototype, {
         callback && callback(null, data);
         return data;
       })
-      .caught(function(err) {
-        this.emit("error", err);
-        if (callback) {
-          callback(err);
-        }
+      .catch(function(err) {
+        callback && callback(err);
         throw err;
       });
   },
@@ -503,11 +474,8 @@ _.extend(Mongo.prototype, {
         callback && callback(null, data);
         return data;
       })
-      .caught(function(err) {
-        this.emit("error", err);
-        if (callback) {
-          callback(err);
-        }
+      .catch(function(err) {
+        callback && callback(err);
         throw err;
       });
   },
@@ -522,11 +490,8 @@ _.extend(Mongo.prototype, {
         callback && callback(null, data);
         return data;
       })
-      .caught(function(err) {
-        this.emit("error", err);
-        if (callback) {
-          callback(err);
-        }
+      .catch(function(err) {
+        callback && callback(err);
         throw err;
       });
   },
@@ -546,11 +511,8 @@ _.extend(Mongo.prototype, {
         callback && callback(null, data);
         return data;
       })
-      .caught(function(err) {
-        this.emit("error", err);
-        if (callback) {
-          callback(err);
-        }
+      .catch(function(err) {
+        callback && callback(err);
         throw err;
       });
   },
@@ -568,11 +530,8 @@ _.extend(Mongo.prototype, {
         callback && callback(null, data);
         return data;
       })
-      .caught(function(err) {
-        this.emit("error", err);
-        if (callback) {
-          callback(err);
-        }
+      .catch(function(err) {
+        callback && callback(err);
         throw err;
       });
   }
