@@ -3,19 +3,17 @@
 // What is Controller?
 // ---
 
-// Controller helps facilitate routing via express by providing controllers that react to route functions
+// Controller helps facilitate routing via express by providing configuring route handlers
 // 
 // For example, a route to `/users/:id` would be handled by a `UsersController` with function `findOne`
 // 
-// It provides a way for each controller to setup the routes and http methods it wants to respond to
+// It provides a way for each controller to setup the routes and handlers it wants to respond to
 // 
-// Also provides a mechanism to define before and after middleware per controller
+// Also provides a mechanism to define pre, before, and after middleware per controller or per route
 // 
-// Finally, it also provides response and error handling default middleware
-
-// TODO
-// ---
-// 2014/05/22 - Peter will add some comments
+// Finally, it also provides response and error handling middleware
+// 
+// Also parses query strings for filter, limit, and sort
 
 // Dependencies
 // ---
@@ -51,7 +49,7 @@ module.exports = Backbone.Model.extend({
     this.after = []; // run after route handler
     this.post = []; // run after everything else (internal use)
 
-    // Setup
+    // Setup middleware and route handlers
     this.setupPreMiddleware();
     this.setupBeforeMiddleware();
     this.setupRoutes();
@@ -59,40 +57,35 @@ module.exports = Backbone.Model.extend({
     this.setupPostMiddleware();
   },
 
-  /**
-   * Computes the base path for the controller
-   */
+  // Computes the base path for the controller
   basePath: function() {
     return this.path;
   },
 
-  /**
-   * Setup routes that this controller should handle
-   */
+  // Setup routes that this controller should handle
+  // 
+  // Example:
+  // this.routes.get["/test"] = {
+  //   action: this.testGet,
+  //   middleware: []
+  // };
   setupRoutes: function() {},
 
-  /**
-   * Setup middleware that should run before the route middleware
-   * i.e. this.before.push(this.fakePreMiddleware)
-   */
+  // Setup middleware that should run before the route middleware
+  // Example: `this.pre.push(this.fakePreMiddleware)`
   setupPreMiddleware: function() {},
 
-  /**
-   * Setup middleware that should run before the route handler
-   * i.e. this.before.push(this.fakeBeforeMiddleware)
-   */
+  // Setup middleware that should run before the route handler
+  // Example: `this.before.push(this.fakeBeforeMiddleware)`
   setupBeforeMiddleware: function() {},
 
-  /**
-   * Setup middleware that should run after the route handler
-   * i.e. this.after.push(this.fakeAfterMiddleware)
-   */
+  // Setup middleware that should run after the route handler
+  // Example: `this.after.push(this.fakeAfterMiddleware)`
   setupAfterMiddleware: function() {},
 
-  /**
-   * Setup middleware that should run after everything else (internal use)
-   * i.e. this.post.push(this.fakePostMiddleware)
-   */
+  // Setup middleware that should run after everything else
+  // Example: `this.post.push(this.fakePostMiddleware)`
+  // DO NOT OVERRIDE (advanced internal use)
   setupPostMiddleware: function() {
     this.post.push(this.successResponse);
     this.post.push(this.errorResponse);
@@ -103,6 +96,7 @@ module.exports = Backbone.Model.extend({
   // Middleware
   // ---
 
+  // Checks for the presence of `req.admin`
   requireAdmin: function(req, res, next) {
     var err;
     if (!req.admin) {
@@ -112,6 +106,7 @@ module.exports = Backbone.Model.extend({
     next(err);
   },
 
+  // Checks for the presence of `req.user`
   requireUser: function(req, res, next) {
     var err;
     if (!req.user) {
@@ -121,6 +116,7 @@ module.exports = Backbone.Model.extend({
     next(err);
   },
 
+  // Checks for `Content-Type: application/json` in the headers
   requireJSON: function(req, res, next) {
     var err;
     if (!req.is('json')) {
@@ -131,6 +127,7 @@ module.exports = Backbone.Model.extend({
   },
 
   // Promise friendly next()
+  // Used as a resolver for `then`
   nextThen: function(req, res, next) {
     return function(modelOrCollection) {
       this.prepareResponse(modelOrCollection, req, res, next);
@@ -138,6 +135,7 @@ module.exports = Backbone.Model.extend({
   },
 
   // Promise friendly next(err)
+  // Used as a resolver for `catch`
   nextCatch: function(req, res, next) {
     return function(err) {
       next(err);
@@ -208,6 +206,7 @@ module.exports = Backbone.Model.extend({
   },
 
   // Final middleware for handling all responses
+  // Server actually responds to the request here
   finalResponse: function(req, res, next) {
     // If we timed out before managing to respond, don't send the response
     if (res.headerSent) {
@@ -230,9 +229,8 @@ module.exports = Backbone.Model.extend({
   },
 
 
-  ///////////////
-  // Renderers //
-  ///////////////
+  // Renderers
+  // ---
   
   renderModel: function(model) {
     return model.render().content();
@@ -247,14 +245,11 @@ module.exports = Backbone.Model.extend({
 
 
 
-  /////////////
-  // Helpers //
-  /////////////
+  // Helpers
+  // ---
 
-  /**
-   * Parses req.query (querystring) for since/until, sort/order, skip/limit
-   * Also builds a query using allowed queryParams if applicable
-   */
+  // Parses req.query (querystring) for since/until, sort/order, skip/limit
+  // Also builds a query using allowed queryParams if applicable
   parseQueryString: function(req) {
     var query = {};
     var queries = [];
