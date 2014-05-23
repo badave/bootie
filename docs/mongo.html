@@ -479,6 +479,12 @@ _.extend(Mongo.prototype, {
 
     options = options || {};
 
+    <span class="hljs-keyword">var</span> <span class="hljs-built_in">require</span> = <span class="hljs-literal">false</span>;
+    <span class="hljs-keyword">if</span> (options.require) {
+      <span class="hljs-built_in">require</span> = options.require;
+      <span class="hljs-keyword">delete</span> options.require;
+    }
+
     query = <span class="hljs-keyword">this</span>.cast(query);
     <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.collection(collectionName)
       .bind(<span class="hljs-keyword">this</span>)
@@ -487,8 +493,8 @@ _.extend(Mongo.prototype, {
       })
       .then(<span class="hljs-keyword">this</span>.uncast)
       .then(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(data)</span> {</span>
-        <span class="hljs-keyword">if</span> (!data &amp;&amp; options.require) {
-          <span class="hljs-keyword">var</span> requireErr = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">"Document not found."</span>)
+        <span class="hljs-keyword">if</span> (!data &amp;&amp; <span class="hljs-built_in">require</span>) {
+          <span class="hljs-keyword">var</span> requireErr = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">"Document not found for query: "</span> + <span class="hljs-built_in">JSON</span>.stringify(query) + <span class="hljs-string">"."</span>)
           requireErr.code = <span class="hljs-number">404</span>;
           <span class="hljs-keyword">throw</span> requireErr;
         }

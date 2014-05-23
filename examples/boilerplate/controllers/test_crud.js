@@ -4,8 +4,8 @@ var Bootie = require('bootie');
 var filed = require('filed');
 var basename = require('path').basename;
 
-var TestModel = require('../models/test_model');
-var TestCollection = require('../collections/test_collection');
+var TestModel = require('../models/test');
+var TestCollection = require('../collections/test');
 
 module.exports = Bootie.CrudController.extend({
   className: "TestCrudController",
@@ -25,10 +25,13 @@ module.exports = Bootie.CrudController.extend({
   authenticateUser: function(req, res, next) {
     req.user = new Bootie.Backbone.Model({
       _id: "52f437941c8aaaf2e426dc71",
+      id: "52f437941c8aaaf2e426dc71",
       email: "jdagnels@gmail.com",
       name: "Jack Dagnels"
     });
+    req.admin = true;
+    req.god = true;
     next();
-  },
-
+  }
+  
 });

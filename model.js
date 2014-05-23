@@ -34,6 +34,11 @@ module.exports = Backbone.Model.extend({
     return resp;
   },
 
+  // Do any request body sanitation here
+  setFromRequest: function(body) {
+    this.set(body);
+  },
+
   // Picks an explicit set of attributes to include in the response
   // There are 2 arrays (public and private) that determine which attributes are included
   render: function() {
@@ -173,6 +178,7 @@ module.exports = Backbone.Model.extend({
         query[this.userIdAttribute] = model.get(this.userIdAttribute);
       }
     }
+
     var mongoOptions = _.pick(options, ["require"]) || {};
     return this.db.findOne(this.urlRoot, query, mongoOptions, this.wrapResponse(options));
   }

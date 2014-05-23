@@ -21,7 +21,7 @@ var Database = require("./database");
 
 module.exports = Controller.extend({
   className: "CrudController",
-  debug: false,
+  debug: true,
 
   // The mongodb collection name
   urlRoot: 'models',
@@ -45,7 +45,7 @@ module.exports = Controller.extend({
       }).catch(function(err) {
         // Mongo failed to connect
         if (this.debug) {
-          console.log(err)
+          console.log(err);
         }
       });
     }
@@ -110,6 +110,7 @@ module.exports = Controller.extend({
     }.bind(this));
   },
 
+  // TODO this should probably move to base controller
   setupPreMiddleware: function() {
     this.pre.push(this.authenticateUser);
   },
@@ -121,29 +122,25 @@ module.exports = Controller.extend({
   },
 
   // CRUD functions
+  // ---
+  
   find: function(req, res, next, options) {
-    var collection = this.setupCollection(req);
-
     var qo = this.parseQueryString(req);
-    qo.query[collection.model.prototype.userIdAttribute] = req.user.id;
+    var collection = this.setupCollection(req, qo);
 
-    if (!_.isEmpty(options)) {
-      _.extend(qo.query, options);
+    // Override query
+    if (options && options.query) {
+      _.extend(qo.query, options.query);
     }
 
-    // If godmode is on, return list of ALL orders
-    if (req.god) {
-      delete qo.query[collection.model.prototype.userIdAttribute];
-    }
-
-    return collection.fetch(qo).bind(this).then(function() {
-      return collection.count(qo).tap(function(total) {
+    return collection.fetch(qo).bind(this).then(function(resp) {
+      return collection.count(qo).tap(function(resp) {
         res.paging = {
-          total: parseInt(total),
+          total: parseInt(resp),
           count: parseInt(collection.models.length),
           limit: parseInt(qo.limit),
           offset: parseInt(qo.skip),
-          has_more: parseInt(collection.models.length) < parseInt(total)
+          has_more: parseInt(collection.models.length) < parseInt(resp)
         };
       });
     }).then(function(count) {
@@ -156,13 +153,6 @@ module.exports = Controller.extend({
 
     return model.fetch({
       require: true
-    }).bind(this).tap(function(model) {
-      if (model && model.get(model.userIdAttribute) !== req.user.id && !req.admin) {
-        var err = new Error("Permission denied");
-        err.code = 403;
-        throw err;
-      }
-      return model;
     }).then(this.nextThen(req, res, next)).catch(this.nextCatch(req, res, next));
   },
 
@@ -175,32 +165,15 @@ module.exports = Controller.extend({
 
   update: function(req, res, next) {
     var model = this.setupModel(req);
+    model.setFromRequest(req.body);
 
-    return model.fetch({
-      require: true
-    }).bind(this).then(function(model) {
-      // checks to see if the user owns this model
-      if (model && model.get(model.userIdAttribute) !== req.user.id && !req.admin) {
-        var err = new Error("Permission denied");
-        err.code = 403;
-        throw err;
-      }
-
-      model.setFromRequest(req.body);
-      return model.save();
-    }).then(this.nextThen(req, res, next)).catch(this.nextCatch(req, res, next));
+    return model.save().bind(this).then(this.nextThen(req, res, next)).catch(this.nextCatch(req, res, next));
   },
 
   destroy: function(req, res, next) {
     var model = this.setupModel(req);
 
-    return model.fetch({
-      require: true
-    }).bind(this).then(function() {
-      return model.destroy({
-        require: true
-      }).then(this.nextThen(req, res, next));
-    }).catch(this.nextCatch(req, res, next));
+    return model.destroy().then(this.nextThen(req, res, next)).catch(this.nextCatch(req, res, next));
   },
 
 
@@ -211,24 +184,26 @@ module.exports = Controller.extend({
     var model = new this.model();
     model.db = this.database.mongo;
 
-    if (req.user) {
-      model.user = req.user;
-      model.set(this.model.prototype.userIdAttribute, req.user.id);
-    }
-
+    // If an `id` is provided, set it to the model
     if (req.params.id) {
       model.set(this.model.prototype.idAttribute, req.params.id);
+    }
+
+    // If the authenticated user is not godmode, set `user_id` to restrict queries
+    if (req.user && !req.god) {
+      model.set(this.model.prototype.userIdAttribute, req.user.id);
     }
 
     return model;
   },
 
-  setupCollection: function(req) {
+  setupCollection: function(req, qo) {
     var collection = new this.collection();
     collection.db = this.database.mongo;
 
-    if (req.user) {
-      collection.user = req.user;
+    // If the authenticated user is not godmode, set `user_id` to restrict queries
+    if (req.user && !req.god) {
+      qo.query[collection.model.prototype.userIdAttribute] = req.user.id;
     }
 
     return collection;

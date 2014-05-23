@@ -275,6 +275,12 @@ _.extend(Mongo.prototype, {
 
     options = options || {};
 
+    var require = false;
+    if (options.require) {
+      require = options.require;
+      delete options.require;
+    }
+
     query = this.cast(query);
     return this.collection(collectionName)
       .bind(this)
@@ -283,8 +289,8 @@ _.extend(Mongo.prototype, {
       })
       .then(this.uncast)
       .then(function(data) {
-        if (!data && options.require) {
-          var requireErr = new Error("Document not found.")
+        if (!data && require) {
+          var requireErr = new Error("Document not found for query: " + JSON.stringify(query) + ".")
           requireErr.code = 404;
           throw requireErr;
         }

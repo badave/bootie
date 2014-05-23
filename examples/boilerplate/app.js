@@ -53,8 +53,8 @@ app.use(bodyParser());
 app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
 
 // Router
-var TestController = require('./controllers/test_controller');
-var TestCrudController = require('./controllers/test_crud_controller');
+var TestController = require('./controllers/test');
+var TestCrudController = require('./controllers/test_crud');
 
 var router = new Bootie.Router({
   version: "v2",
