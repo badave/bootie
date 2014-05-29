@@ -13,6 +13,19 @@ var Bootie = {};
 
 Bootie.Backbone = require('backbone');
 Bootie._ = require('lodash');
+Bootie.colors = require('colors');
+Bootie.colors.setTheme({
+  silly: 'rainbow',
+  input: 'grey',
+  verbose: 'cyan',
+  prompt: 'grey',
+  info: 'green',
+  data: 'grey',
+  help: 'cyan',
+  warn: 'yellow',
+  debug: 'blue',
+  error: 'red'
+});
 
 // All external libraries
 // ---

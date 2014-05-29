@@ -125,6 +125,10 @@ module.exports = Controller.extend({
       _.extend(qo.query, options.query);
     }
 
+    if (this.debug) {
+      console.log("Find with Query: %s".verbose, JSON.stringify(qo));
+    }
+
     return collection.fetch(qo).bind(this).then(function(resp) {
       return collection.count(qo).tap(function(resp) {
         res.paging = {
@@ -143,6 +147,10 @@ module.exports = Controller.extend({
   findOne: function(req, res, next) {
     var model = this.setupModel(req);
 
+    if (this.debug) {
+      console.log("Find with ID: %s".verbose, model.id);
+    }
+
     return model.fetch({
       require: true
     }).then(this.nextThen(req, res, next)).catch(this.nextCatch(req, res, next));
@@ -151,20 +159,17 @@ module.exports = Controller.extend({
   create: function(req, res, next) {
     var model = this.setupModel(req);
     model.setFromRequest(req.body);
-
     return model.save().bind(this).then(this.nextThen(req, res, next)).catch(this.nextCatch(req, res, next));
   },
 
   update: function(req, res, next) {
     var model = this.setupModel(req);
     model.setFromRequest(req.body);
-
     return model.save().bind(this).then(this.nextThen(req, res, next)).catch(this.nextCatch(req, res, next));
   },
 
   destroy: function(req, res, next) {
     var model = this.setupModel(req);
-
     return model.destroy().then(this.nextThen(req, res, next)).catch(this.nextCatch(req, res, next));
   },
 

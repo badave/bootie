@@ -25,7 +25,8 @@
     "request": "^2.36.0",
     "redis": "^0.10.3",
     "iron_mq": "^0.2.3",
-    "express": "^4.3.0"
+    "express": "^4.3.0",
+    "colors": "^0.6.2"
   },
   "devDependencies": {
     "mocha": "^1.19.0",

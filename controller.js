@@ -206,7 +206,7 @@ module.exports = Backbone.Model.extend({
     // TODO
     // We should log these errors somewhere remotely
     if (this.debug) {
-      console.log(err.stack);
+      console.log(err.stack.error);
     }
 
     res.data = envelope;
