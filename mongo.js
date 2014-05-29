@@ -83,12 +83,13 @@ _.extend(Mongo.prototype, {
       });
   }),
 
+  // Check if a string is a valid ObjectID
   isValidObjectID: function(id) {
     var checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$");
     return (typeof id === 'string') && id.length === 24 && checkForHexRegExp.test(id);
   },
 
-  // Automatic casting to ObjectID
+  // Automatically cast to HexString to ObjectID
   cast: function(obj) {
     _.each(obj, function(val, key) {
       if (_.isString(val)) {
@@ -109,6 +110,7 @@ _.extend(Mongo.prototype, {
     return obj;
   },
 
+  // Automatically cast ObjectID to HexString
   uncast: function(obj) {
     _.each(obj, function(val, key) {
       if (val && _.isFunction(val.toHexString)) {
@@ -127,31 +129,32 @@ _.extend(Mongo.prototype, {
     return obj;
   },
 
-  // generate a new object id
+  // Generate a new object id
   newId: function() {
     return new ObjectID().toHexString();
   },
 
-  // retrieve the cursor
+  // Retrieve the cursor
+  // Used by `find` and `findCursor`
   _cursor: function(collectionName, query) {
     var args = [].slice.call(arguments);
     var options = args.length > 2 && typeof args[args.length - 1] == 'object' && args.pop();
     options = options || {};
 
-    var cursor;
-    if (options.fields) {
-      var fields = options.fields;
+    var fields = null;
+    if (_.isArray(options.fields)) {
+      fields = options.fields;
       delete options.fields;
-      cursor = this._db.collection(collectionName).find(query, fields, options);
-    } else {
-      cursor = this._db.collection(collectionName).find(query, options);
     }
 
+    var cursor = this._db.collection(collectionName).find(query, fields, options);
     Promise.promisifyAll(cursor);
+
     return cursor;
   },
 
   // Find with a cursor, can pass in options.fields and get specific fields
+  // NOTE: The cursor does NOT automatically `uncast` $oid in results
   findCursor: function(collectionName, query) {
     var args = [].slice.call(arguments);
 
@@ -276,16 +279,22 @@ _.extend(Mongo.prototype, {
     options = options || {};
 
     var require = false;
-    if (options.require) {
+    if (_.isBoolean(options.require)) {
       require = options.require;
       delete options.require;
+    }
+
+    var fields = null;
+    if (_.isArray(options.fields)) {
+      fields = options.fields;
+      delete options.fields;
     }
 
     query = this.cast(query);
     return this.collection(collectionName)
       .bind(this)
       .then(function(collection) {
-        return collection.findOneAsync(query, options);
+        return collection.findOneAsync(query, fields, options);
       })
       .then(this.uncast)
       .then(function(data) {
