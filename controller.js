@@ -48,14 +48,17 @@ module.exports = Backbone.Model.extend({
     this.pre = []; // run before route middleware
     this.before = []; // run after route middleware but before route handler
     this.after = []; // run after route handler
-    this.post = []; // run after everything else (internal use)
 
     // Setup middleware and route handlers
     this.setupPreMiddleware();
     this.setupBeforeMiddleware();
     this.setupRoutes();
     this.setupAfterMiddleware();
-    this.setupPostMiddleware();
+
+    // Response/error handler middleware
+    this.after.push(this.successResponse);
+    this.after.push(this.errorResponse);
+    this.after.push(this.finalResponse);
   },
 
   // Computes the base path for the controller
@@ -83,15 +86,6 @@ module.exports = Backbone.Model.extend({
   // Setup middleware that should run after the route handler
   // Example: `this.after.push(this.fakeAfterMiddleware)`
   setupAfterMiddleware: function() {},
-
-  // Setup middleware that should run after everything else
-  // Example: `this.post.push(this.fakePostMiddleware)`
-  // DO NOT OVERRIDE (advanced internal use)
-  setupPostMiddleware: function() {
-    this.post.push(this.successResponse);
-    this.post.push(this.errorResponse);
-    this.post.push(this.finalResponse);
-  },
 
 
   // Middleware

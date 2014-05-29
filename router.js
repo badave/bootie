@@ -46,10 +46,9 @@ module.exports = function(options) {
           var pre = _.invoke(controller.pre, 'bind', controller);
           var before = _.invoke(controller.before, 'bind', controller);
           var after = _.invoke(controller.after, 'bind', controller);
-          var post = _.invoke(controller.post, 'bind', controller);
           router[method](path, pre || [], routeOptions.middleware || [], before || [], function(req, res, next) {
             routeOptions.action.call(controller, req, res, next);
-          }, after || [], post || []);
+          }, after || []);
 
           // Add route to set of active routes
           router.routes.push({
