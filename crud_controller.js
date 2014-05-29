@@ -17,7 +17,6 @@ var _ = require('lodash');
 var Controller = require('./controller');
 var Model = require("./model");
 var Collection = require("./collection");
-var Database = require("./database");
 
 module.exports = Controller.extend({
   debug: true,
@@ -167,6 +166,7 @@ module.exports = Controller.extend({
   setupModel: function(req) {
     var model = new this.model();
     model.db = this.get('db');
+    model.cache = this.get('cache');
     return model;
   },
 
@@ -175,6 +175,7 @@ module.exports = Controller.extend({
   setupCollection: function(req, qo) {
     var collection = new this.collection();
     collection.db = this.get('db');
+    collection.cache = this.get('cache');
     return collection;
   }
 

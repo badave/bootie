@@ -54,15 +54,18 @@ app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
 
 
 // Database
+// Connects to 2 mongo urls
 var database = new Bootie.Database({
   mongos: {
     primary: "mongodb://localhost:27017/test",
     secondary: "mongodb://localhost:27017/test"
   },
-  // redis: {
-  //   port: 6370,
-  //   host: 'localhost'
-  // }
+  caches: {
+    // primary: {
+    //   port: 6370,
+    //   host: 'localhost'
+    // }
+  }
 });
 
 
@@ -75,7 +78,8 @@ var router = new Bootie.Router({
   controllers: {
     test: new TestController(),
     test_crud: new TestCrudController({
-      db: database.secondary
+      db: database.mongos.primary,
+      cache: database.caches.primary
     })
   }
 });

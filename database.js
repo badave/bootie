@@ -21,19 +21,26 @@ module.exports = Backbone.Model.extend({
       mongos: {},
 
       // Keys: port, host, auth
-      redis: {}
+      caches: {}
     };
   },
 
   initialize: function() {
+    this.mongos = {};
+    this.caches = {};
+    
+    // Setup all configured mongo connections
     _.each(this.get('mongos'), function(val, key) {
       this.setupMongo(key, val);
     }.bind(this));
 
-    this.setupRedis(this.get('redis'));
+    // Setup all configured redis connections
+    _.each(this.get('caches'), function(val, key) {
+      this.setupRedis(key, val);
+    }.bind(this));
   },
 
-  setupRedis: function(options) {
+  setupRedis: function(name, options) {
     if (_.isEmpty(options)) {
       return;
     }
@@ -42,10 +49,10 @@ module.exports = Backbone.Model.extend({
     if (options.auth) {
       redisClient.auth(options.auth);
     }
-    this.redis = redisClient;
+    this.caches[name] = redisClient;
 
     // Catching this error event will prevent node from exiting
-    this.redis.on('error', function(err) {
+    this.caches[name].on('error', function(err) {
       console.error("Redis %d connect error to url: %s - %s".error, process.pid, connString, err.message);
     }.bind(this));
 
@@ -62,22 +69,22 @@ module.exports = Backbone.Model.extend({
   },
 
   setupMongo: function(name, url) {
-    this[name] = new Mongo(url);
+    this.mongos[name] = new Mongo(url);
     
     // Events
-    this[name].on("connect", function(url) {
+    this.mongos[name].on("connect", function(url) {
       if (this.debug) {
         console.log("Mongo %s (%d) connected to url: %s".info, name, process.pid, url);
       }
     }.bind(this));
 
-    this[name].on("error", function(error) {
+    this.mongos[name].on("error", function(error) {
       if (this.debug) {
         console.error("Mongo %s (%d) connect error to url: %s -> %s".error, name, process.pid, url, error.message);
       }
     }.bind(this));
 
     // Connect
-    this[name].connect();
+    this.mongos[name].connect();
   }
 });

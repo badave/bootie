@@ -11,6 +11,11 @@ module.exports = Backbone.Collection.extend({
 
   model: Model,
 
+  initialize: function() {
+    this.db = null;
+    this.cache = null;
+  },
+
   // Copied from Backbone, not currently overridden
   parse: function(resp, options) {
     return resp;

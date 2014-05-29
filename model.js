@@ -24,6 +24,11 @@ module.exports = Backbone.Model.extend({
   // Should be optionally set explicitly in each model
   publicAttributes: [],
 
+  initialize: function() {
+    this.db = null;
+    this.cache = null;
+  },
+
   // Copied from Backbone
   parse: function(resp, options) {
     // Mongodb `create` returns an array of one document
