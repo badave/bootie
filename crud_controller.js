@@ -36,22 +36,6 @@ module.exports = Controller.extend({
   initialize: function() {
     // Make sure to call `super` as a best practice when overriding
     Controller.prototype.initialize.call(this);
-
-    // Create a connection to the database for this controller
-    // TODO should we use a shared connection across controllers instead?
-    if (this.get('mongo')) {
-      this.database = new Database({
-        mongo: this.get('mongo')
-      });
-      this.database.mongo.connect().bind(this).then(function() {
-        // Mongo connected
-      }).catch(function(err) {
-        // Mongo failed to connect
-        if (this.debug) {
-          console.log(err);
-        }
-      });
-    }
   },
 
   // Base path appends `urlRoot`
@@ -182,7 +166,7 @@ module.exports = Controller.extend({
   // If there is an authenticated user, set the `user_id` attribute
   setupModel: function(req) {
     var model = new this.model();
-    model.db = this.database.mongo;
+    model.db = this.get('db');
     return model;
   },
 
@@ -190,7 +174,7 @@ module.exports = Controller.extend({
   // If there is an authenticated user, add `user_id` to the query
   setupCollection: function(req, qo) {
     var collection = new this.collection();
-    collection.db = this.database.mongo;
+    collection.db = this.get('db');
     return collection;
   }
 

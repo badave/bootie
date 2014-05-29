@@ -52,6 +52,20 @@ app.use(bodyParser());
 // Parse application/vnd.api+json as json
 app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
 
+
+// Database
+var database = new Bootie.Database({
+  mongos: {
+    primary: "mongodb://localhost:27017/test",
+    secondary: "mongodb://localhost:27017/test"
+  },
+  // redis: {
+  //   port: 6370,
+  //   host: 'localhost'
+  // }
+});
+
+
 // Router
 var TestController = require('./controllers/test');
 var TestCrudController = require('./controllers/test_crud');
@@ -61,9 +75,7 @@ var router = new Bootie.Router({
   controllers: {
     test: new TestController(),
     test_crud: new TestCrudController({
-      mongo: {
-        url: "mongodb://localhost:27017/test"
-      }
+      db: database.secondary
     })
   }
 });

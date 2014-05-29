@@ -13,57 +13,71 @@ var Mongo = require('./mongo');
 
 // DatabaseManager is a singleton that maintains the databases
 module.exports = Backbone.Model.extend({
-  debug: false,
+  debug: true,
 
   defaults: function() {
     return {
-      mongo: {
-        url: null
-      },
-      redis: {
-        port: 6379,
-        host: null,
-        auth: null
-      }
+      // Each `key: value` pair should consist of `name: url`
+      mongos: {},
+
+      // Keys: port, host, auth
+      redis: {}
     };
   },
 
   initialize: function() {
-    if (this.get('mongo').url) {
-      this.setupMongo(this.get('mongo').url);
-    }
-    if (this.get('redis').host) {
-      this.setupRedis(this.get('redis').port, this.get('redis').host, this.get('redis').auth);
-    }
+    _.each(this.get('mongos'), function(val, key) {
+      this.setupMongo(key, val);
+    }.bind(this));
+
+    this.setupRedis(this.get('redis'));
   },
 
-  setupRedis: function() {
-    var cache = redis.createClient(port, host);
-    cache.auth(auth);
-    this.redis = cache;
+  setupRedis: function(options) {
+    if (_.isEmpty(options)) {
+      return;
+    }
+
+    var redisClient = redis.createClient(options.port, options.host);
+    if (options.auth) {
+      redisClient.auth(options.auth);
+    }
+    this.redis = redisClient;
+
+    // Catching this error event will prevent node from exiting
+    this.redis.on('error', function(err) {
+      console.error("Redis %d connect error to url: %s - %s".error, process.pid, connString, err.message);
+    }.bind(this));
 
     if (this.debug) {
-      console.log("Redis %d connected to url: %s@%:s", process.pid, auth, host + port)
+      var connString = '';
+      if (options.auth) {
+        connString += options.auth + "@";
+      }
+      connString += options.host;
+      connString += ':';
+      connString += options.port;
+      console.log("Redis %d connected to url: %s", process.pid, connString);
     }
   },
 
-  setupMongo: function(url) {
-    this.mongo = new Mongo(url);
-    this.mongo.name = url;
-    this.setupEvents(this.mongo);
-  },
-
-  setupEvents: function(db) {
-    db.on("connect", function(url) {
+  setupMongo: function(name, url) {
+    this[name] = new Mongo(url);
+    
+    // Events
+    this[name].on("connect", function(url) {
       if (this.debug) {
-        console.log("Mongo %d connected to url: %s - %s", process.pid, url);
+        console.log("Mongo %s (%d) connected to url: %s".info, name, process.pid, url);
       }
     }.bind(this));
 
-    db.on("error", function(error) {
+    this[name].on("error", function(error) {
       if (this.debug) {
-        console.error("Mongo %d had an error at url: %s - %s", process.pid, url, error.message)
+        console.error("Mongo %s (%d) connect error to url: %s -> %s".error, name, process.pid, url, error.message);
       }
     }.bind(this));
+
+    // Connect
+    this[name].connect();
   }
 });
