@@ -20,12 +20,13 @@ var Collection = require("./collection");
 var Database = require("./database");
 
 module.exports = Controller.extend({
-  className: "CrudController",
   debug: true,
 
+  // All subclasses of crud controller need `urlRoot` defined
   // The mongodb collection name
   urlRoot: 'models',
 
+  // All subclasses of crud controller need `model` and `collection` defined
   model: Model,
   collection: Collection,
 
@@ -36,6 +37,8 @@ module.exports = Controller.extend({
     // Make sure to call `super` as a best practice when overriding
     Controller.prototype.initialize.call(this);
 
+    // Create a connection to the database for this controller
+    // TODO should we use a shared connection across controllers instead?
     if (this.get('mongo')) {
       this.database = new Database({
         mongo: this.get('mongo')
@@ -73,52 +76,41 @@ module.exports = Controller.extend({
           // Create
           this.routes.post[basePath] = {
             action: this.create,
-            middleware: [this.requireUser, this.requireJSON]
+            middleware: this.getMiddleware('create')
           };
           break;
         case 'R':
           // Find
           this.routes.get[basePath] = {
             action: this.find,
-            middleware: [this.requireUser]
+            middleware: this.getMiddleware('find')
           };
           break;
         case 'O':
           // FindOne
           this.routes.get[basePath + "/:id"] = {
             action: this.findOne,
-            middleware: [this.requireUser]
+            middleware: this.getMiddleware('findOne')
           };
           break;
         case 'U':
           // Update
           this.routes.put[basePath + "/:id"] = {
             action: this.update,
-            middleware: [this.requireUser, this.requireJSON]
+            middleware: this.getMiddleware('update')
           };
           break;
         case 'D':
           // Destroy
           this.routes.delete[basePath + "/:id"] = {
             action: this.destroy,
-            middleware: [this.requireUser]
+            middleware: this.getMiddleware('destroy')
           };
           break;
         default:
           break;
       }
     }.bind(this));
-  },
-
-  // TODO this should probably move to base controller
-  setupPreMiddleware: function() {
-    this.pre.push(this.authenticateUser);
-  },
-
-  authenticateUser: function(req, res, next) {
-    // This is the ideal place to authenticate the user with the db
-    // and set `req.user` and optionally `req.admin`
-    next();
   },
 
   // CRUD functions
@@ -180,32 +172,20 @@ module.exports = Controller.extend({
   // Helpers
   // ---
 
+  // Creates and returns a model
+  // Checks for the existence of `id` in the url params
+  // If there is an authenticated user, set the `user_id` attribute
   setupModel: function(req) {
     var model = new this.model();
     model.db = this.database.mongo;
-
-    // If an `id` is provided, set it to the model
-    if (req.params.id) {
-      model.set(this.model.prototype.idAttribute, req.params.id);
-    }
-
-    // If the authenticated user is not godmode, set `user_id` to restrict queries
-    if (req.user && !req.god) {
-      model.set(this.model.prototype.userIdAttribute, req.user.id);
-    }
-
     return model;
   },
 
+  // Creates and returns a collection
+  // If there is an authenticated user, add `user_id` to the query
   setupCollection: function(req, qo) {
     var collection = new this.collection();
     collection.db = this.database.mongo;
-
-    // If the authenticated user is not godmode, set `user_id` to restrict queries
-    if (req.user && !req.god) {
-      qo.query[collection.model.prototype.userIdAttribute] = req.user.id;
-    }
-
     return collection;
   }
 

@@ -2,7 +2,5 @@
 
 var Bootie = require('bootie');
 
-module.exports = Bootie.CrudController.extend({
-  className: "BaseController",
-
+module.exports = Bootie.Controller.extend({
 });

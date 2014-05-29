@@ -3,5 +3,4 @@
 var Bootie = require('bootie');
 
 module.exports = Bootie.Collection.extend({
-  className: "BaseCollection"
 });

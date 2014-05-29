@@ -7,7 +7,6 @@ var Promise = require('bluebird');
 var Backbone = require('backbone');
 
 module.exports = Backbone.Model.extend({
-  className: "Model",
   debug: false,
 
   // mongodb id attribute, usually `_id`

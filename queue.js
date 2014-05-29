@@ -11,8 +11,6 @@ var Backbone = require('backbone');
 var iron = require('iron_mq');
 
 module.exports = Backbone.Model.extend({
-  className: "Queue",
-
   initialize: function() {
     if (!this.get('token') || !this.get('project_id') || !this.get('queue_name') || !this.get('jobs')) {
       _.warn("You are missing parameters...");

@@ -12,8 +12,6 @@ var fs = require("fs");
 var hbs = require("hbs");
 
 module.exports = Backbone.Model.extend({
-  className: "Job",
-
   // This is relative to the CWD (node project root directory)
   templatesDir: './templates/mailers',
 

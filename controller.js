@@ -23,7 +23,6 @@ var Model = require('./model');
 var Collection = require('./collection');
 
 module.exports = Backbone.Model.extend({
-  className: "Controller",
   debug: false,
 
   // Root path url for routes
@@ -64,6 +63,17 @@ module.exports = Backbone.Model.extend({
   // Computes the base path for the controller
   basePath: function() {
     return this.path;
+  },
+
+  getMiddleware: function(action) {
+    var middleware = [];
+
+    // If a middleware was defined
+    if (this.middleware && _.has(this.middleware, action)) {
+      middleware = this.middleware[action];
+    }
+
+    return middleware;
   },
 
   // Setup routes that this controller should handle

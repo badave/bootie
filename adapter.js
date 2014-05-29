@@ -20,7 +20,6 @@ var request = require('request');
 // This one actually tracks LAST_REQUEST, LAST_RESPONSE, and LAST_BODY, 
 // so you can look at those for logging or error handling if need be
 module.exports = Backbone.Model.extend({
-  className: "Adapter",
   urlRoot: "",
   version: "",
 

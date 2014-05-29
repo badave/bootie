@@ -1,5 +1,7 @@
 "use strict";
 
+var Bootie = require('bootie');
+
 module.exports = function(req, res, next) {
   req.user = new Bootie.Backbone.Model({
     _id: "52f437941c8aaaf2e426dc71",

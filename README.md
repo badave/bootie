@@ -2,6 +2,40 @@
 
 TBD
 
+
+### Components
+
+The components of Bootie are as follows:
+
+- Controller
+- Crud Controller
+- Model
+- Collection
+- Router
+- Adapter
+- Mongo
+- Database
+
+#### Controllers
+
+Why is there a `base` and `base_crud` controller?
+
+The intention is to keep `Bootie.Controller` and `Bootie.CrudController` as implementation agnostic as possible.
+
+Therefore in order to configure the loading of application specific `middleware`, a base controller and/or a base crud controller is recommended as an extra layer of inheritance.
+
+
+#### Models
+
+Why is there a `base` model and collection?
+
+Similar principle to controllers, except in the case of models, it is commonly used to define things like `privateAttributes` or other properties that are intended to be inherited by most if not all of the application's models.
+
+A good example is ... TBD
+
+There is less of a reason for base collection, but it is done here to show what is possible.
+
+
 ### What features does Bootie have?
 
 TBD

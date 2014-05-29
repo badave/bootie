@@ -1,14 +1,19 @@
 "use strict";
 
 var Bootie = require('bootie');
+var BaseController = require('./base');
+
+// Vendor modules
 var filed = require('filed');
 var basename = require('path').basename;
 
-module.exports = Bootie.Controller.extend({
-  className: "TestController",
-
+module.exports = BaseController.extend({
   // An example of configuring several routes
   setupRoutes: function() {
+    // Remember to call `super` as a best practice
+    BaseController.prototype.setupRoutes.call(this);
+
+    // Now lets configure some controller specific routes
     this.routes.get["/test"] = {
       action: this.testGet,
       middleware: []
