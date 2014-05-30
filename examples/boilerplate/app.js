@@ -18,6 +18,10 @@ var app = express();
 var env = process.env.NODE_ENV;
 
 
+// Config
+var config = require('./config');
+app.use(config.middleware);
+
 // Middleware before Router
 
 // Favicon
@@ -53,20 +57,10 @@ app.use(bodyParser());
 app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
 
 
+
 // Database
 // Connects to 2 mongo urls
-var database = new Bootie.Database({
-  mongos: {
-    primary: "mongodb://localhost:27017/test",
-    secondary: "mongodb://localhost:27017/test"
-  },
-  caches: {
-    // primary: {
-    //   port: 6370,
-    //   host: 'localhost'
-    // }
-  }
-});
+var database = new Bootie.Database(config.database);
 
 
 // Router
