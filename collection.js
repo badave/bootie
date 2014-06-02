@@ -11,10 +11,12 @@ module.exports = Backbone.Collection.extend({
 
   model: Model,
 
-  initialize: function() {
-    this.db = null;
-    this.cache = null;
-  },
+  // Instance properties
+  // ---
+  // `db`
+  // `cache`
+  
+  initialize: function() {},
 
   // Copied from Backbone, not currently overridden
   parse: function(resp, options) {

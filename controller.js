@@ -25,12 +25,24 @@ var Collection = require('./collection');
 module.exports = Backbone.Model.extend({
   debug: false,
 
-  // Root path url for routes
   path: "/",
 
+  // Route specific middleware definitions
+  // Object or Function
+  middleware: function() {
+    return {};
+  },
+
   // Database query parameters/filters
+  // Object or Function
   queryParams: function() {
     return {};
+  },
+
+  // Computes the base path for the controller
+  // Object or Function
+  basePath: function() {
+    return this.path;
   },
 
   // Called after the constructor
@@ -60,20 +72,15 @@ module.exports = Backbone.Model.extend({
     this.after.push(this.finalResponse);
   },
 
-  // Computes the base path for the controller
-  basePath: function() {
-    return this.path;
-  },
 
-  getMiddleware: function(action) {
-    var middleware = [];
-
-    // If a middleware was defined
-    if (this.middleware && _.has(this.middleware, action)) {
-      middleware = this.middleware[action];
+  getRouteMiddleware: function(action) {
+    // Find route middleware definitions
+    var middleware = _.result(this, 'middleware');
+    if (_.has(middleware, action)) {
+      return middleware[action];
+    } else {
+      return [];
     }
-
-    return middleware;
   },
 
   // Setup routes that this controller should handle
@@ -100,36 +107,6 @@ module.exports = Backbone.Model.extend({
 
   // Middleware
   // ---
-
-  // Checks for the presence of `req.admin`
-  requireAdmin: function(req, res, next) {
-    var err;
-    if (!req.admin) {
-      err = new Error("Admin required.");
-      err.code = 401;
-    }
-    next(err);
-  },
-
-  // Checks for the presence of `req.user`
-  requireUser: function(req, res, next) {
-    var err;
-    if (!req.user) {
-      err = new Error("User required.");
-      err.code = 401;
-    }
-    next(err);
-  },
-
-  // Checks for `Content-Type: application/json` in the headers
-  requireJSON: function(req, res, next) {
-    var err;
-    if (!req.is('json')) {
-      err = new Error("Please set your request headers to contain: `Content-Type: application/json`.");
-      err.code = 400;
-    }
-    next(err);
-  },
 
   // Promise friendly next()
   // Used as a resolver for `then`
@@ -369,7 +346,7 @@ module.exports = Backbone.Model.extend({
     }
 
     // Filter Params
-    var allowedParams = _.extend(this.queryParams(), {
+    var allowedParams = _.extend(_.result(this, 'queryParams'), {
       "user_id": "string"
     });
     var queryParams = _.pick(req.query, _.keys(allowedParams));

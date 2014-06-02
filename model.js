@@ -24,10 +24,13 @@ module.exports = Backbone.Model.extend({
   // Should be optionally set explicitly in each model
   publicAttributes: [],
 
-  initialize: function() {
-    this.db = null;
-    this.cache = null;
-  },
+
+  // Instance properties
+  // ---
+  // `db`
+  // `cache`
+
+  initialize: function() {},
 
   // Copied from Backbone
   parse: function(resp, options) {

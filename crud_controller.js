@@ -59,35 +59,35 @@ module.exports = Controller.extend({
           // Create
           this.routes.post[basePath] = {
             action: this.create,
-            middleware: this.getMiddleware('create')
+            middleware: this.getRouteMiddleware('create')
           };
           break;
         case 'R':
           // Find
           this.routes.get[basePath] = {
             action: this.find,
-            middleware: this.getMiddleware('find')
+            middleware: this.getRouteMiddleware('find')
           };
           break;
         case 'O':
           // FindOne
           this.routes.get[basePath + "/:id"] = {
             action: this.findOne,
-            middleware: this.getMiddleware('findOne')
+            middleware: this.getRouteMiddleware('findOne')
           };
           break;
         case 'U':
           // Update
           this.routes.put[basePath + "/:id"] = {
             action: this.update,
-            middleware: this.getMiddleware('update')
+            middleware: this.getRouteMiddleware('update')
           };
           break;
         case 'D':
           // Destroy
           this.routes.delete[basePath + "/:id"] = {
             action: this.destroy,
-            middleware: this.getMiddleware('destroy')
+            middleware: this.getRouteMiddleware('destroy')
           };
           break;
         default:

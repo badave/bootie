@@ -6,13 +6,25 @@ var requireJsonMiddleware = require('../middleware/require_json');
 
 module.exports = Bootie.CrudController.extend({
   // In this example application, we're loading some crud route specific middleware
-  middleware: {
-    create: [authenticateMiddleware, requireJsonMiddleware],
-    find: [authenticateMiddleware],
-    findOne: [authenticateMiddleware],
-    update: [authenticateMiddleware, requireJsonMiddleware],
-    destroy: [authenticateMiddleware]
+  middleware: function() {
+    return {
+      create: [authenticateMiddleware, requireJsonMiddleware],
+      find: [authenticateMiddleware],
+      findOne: [authenticateMiddleware],
+      update: [authenticateMiddleware, requireJsonMiddleware],
+      destroy: [authenticateMiddleware]
+    };
   },
+
+  queryParams: function() {
+    return {
+      test: true
+    };
+  },
+
+  // queryParams: {
+  //   test: true
+  // },
 
   // Override setupModel to parse id and user_id
   setupModel: function(req) {
