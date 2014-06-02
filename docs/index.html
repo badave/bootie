@@ -165,7 +165,20 @@ Export to global</p>
             <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> Bootie = {};
 
 Bootie.Backbone = <span class="hljs-built_in">require</span>(<span class="hljs-string">'backbone'</span>);
-Bootie._ = <span class="hljs-built_in">require</span>(<span class="hljs-string">'lodash'</span>);</pre></div></div>
+Bootie._ = <span class="hljs-built_in">require</span>(<span class="hljs-string">'lodash'</span>);
+Bootie.colors = <span class="hljs-built_in">require</span>(<span class="hljs-string">'colors'</span>);
+Bootie.colors.setTheme({
+  silly: <span class="hljs-string">'rainbow'</span>,
+  input: <span class="hljs-string">'grey'</span>,
+  verbose: <span class="hljs-string">'cyan'</span>,
+  prompt: <span class="hljs-string">'grey'</span>,
+  info: <span class="hljs-string">'green'</span>,
+  data: <span class="hljs-string">'grey'</span>,
+  help: <span class="hljs-string">'cyan'</span>,
+  warn: <span class="hljs-string">'yellow'</span>,
+  debug: <span class="hljs-string">'blue'</span>,
+  error: <span class="hljs-string">'red'</span>
+});</pre></div></div>
             
         </li>
         

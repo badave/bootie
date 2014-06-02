@@ -138,7 +138,6 @@
 <span class="hljs-keyword">var</span> Model = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./model"</span>);
 
 module.exports = Backbone.Collection.extend({
-  className: <span class="hljs-string">"Collection"</span>,
   debug: <span class="hljs-literal">false</span>,
 
   model: Model,</pre></div></div>
@@ -152,6 +151,36 @@ module.exports = Backbone.Collection.extend({
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-4">&#182;</a>
               </div>
+              <h2 id="instance-properties">Instance properties</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p><code>db</code>
+<code>cache</code></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  
+  initialize: <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>},</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
               <p>Copied from Backbone, not currently overridden</p>
 
             </div>
@@ -163,11 +192,11 @@ module.exports = Backbone.Collection.extend({
         </li>
         
         
-        <li id="section-5">
+        <li id="section-7">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-5">&#182;</a>
+                <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
               <p>Override the backbone sync method for use with mongodb
 options contains 2 callbacks: <code>success</code> and <code>error</code>
@@ -180,11 +209,11 @@ Both callbacks have parameters (model, resp, options)
         </li>
         
         
-        <li id="section-6">
+        <li id="section-8">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-6">&#182;</a>
+                <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
               <p>A <code>request</code> event is fired before with parameters (model, op, options)
 A <code>sync</code> event is fired after with parameters (model, resp, options)</p>
@@ -203,11 +232,11 @@ A <code>sync</code> event is fired after with parameters (model, resp, options)<
         </li>
         
         
-        <li id="section-7">
+        <li id="section-9">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-7">&#182;</a>
+                <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
               <p>Takes the mongodb response and calls the Backbone success method</p>
 
@@ -226,11 +255,11 @@ A <code>sync</code> event is fired after with parameters (model, resp, options)<
         </li>
         
         
-        <li id="section-8">
+        <li id="section-10">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-8">&#182;</a>
+                <a class="pilcrow" href="#section-10">&#182;</a>
               </div>
               <p>Finds mongodb documents</p>
 
@@ -242,11 +271,11 @@ A <code>sync</code> event is fired after with parameters (model, resp, options)<
         </li>
         
         
-        <li id="section-9">
+        <li id="section-11">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-9">&#182;</a>
+                <a class="pilcrow" href="#section-11">&#182;</a>
               </div>
               <p>Build query against where query</p>
 
@@ -259,11 +288,11 @@ A <code>sync</code> event is fired after with parameters (model, resp, options)<
         </li>
         
         
-        <li id="section-10">
+        <li id="section-12">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-10">&#182;</a>
+                <a class="pilcrow" href="#section-12">&#182;</a>
               </div>
               <p>Build query with optional: limit, skip, sort</p>
 
@@ -276,11 +305,11 @@ A <code>sync</code> event is fired after with parameters (model, resp, options)<
         </li>
         
         
-        <li id="section-11">
+        <li id="section-13">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-11">&#182;</a>
+                <a class="pilcrow" href="#section-13">&#182;</a>
               </div>
               <p>Count (not part of <code>sync</code>)
 success/error parameters are (resp)</p>
@@ -302,11 +331,11 @@ success/error parameters are (resp)</p>
         </li>
         
         
-        <li id="section-12">
+        <li id="section-14">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-12">&#182;</a>
+                <a class="pilcrow" href="#section-14">&#182;</a>
               </div>
               <p>Build query against where query</p>
 
@@ -319,11 +348,11 @@ success/error parameters are (resp)</p>
         </li>
         
         
-        <li id="section-13">
+        <li id="section-15">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-13">&#182;</a>
+                <a class="pilcrow" href="#section-15">&#182;</a>
               </div>
               <p>Don’t allow any mongo options for now</p>
 

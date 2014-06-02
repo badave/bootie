@@ -72,17 +72,6 @@ module.exports = Backbone.Model.extend({
     this.after.push(this.finalResponse);
   },
 
-
-  getRouteMiddleware: function(action) {
-    // Find route middleware definitions
-    var middleware = _.result(this, 'middleware');
-    if (_.has(middleware, action)) {
-      return middleware[action];
-    } else {
-      return [];
-    }
-  },
-
   // Setup routes that this controller should handle
   // 
   // Example:
@@ -216,7 +205,7 @@ module.exports = Backbone.Model.extend({
 
   // Render
   // ---
-  
+
   renderModel: function(model) {
     return model.render();
   },
@@ -229,9 +218,19 @@ module.exports = Backbone.Model.extend({
 
 
 
-
   // Helpers
   // ---
+
+  // Gets any route middleware that may have been defined
+  getRouteMiddleware: function(action) {
+    // Find route middleware definitions
+    var middleware = _.result(this, 'middleware');
+    if (_.has(middleware, action)) {
+      return middleware[action];
+    } else {
+      return [];
+    }
+  },
 
   // Parses req.query (querystring) for since/until, sort/order, skip/limit
   // Also builds a query using allowed queryParams if applicable
@@ -403,47 +402,6 @@ module.exports = Backbone.Model.extend({
       "limit": parseInt(limit, 10),
       "skip": parseInt(skip, 10)
     };
-  },
-
-
-  // Get `access_token` from `req`
-  // Attempts to get an `access_token` from the `Authorization` header
-  // Uses several fallbacks to read the token
-  // Also falls back to reading `access_token` from the query string
-  accessTokenFromRequest: function(req) {
-    var access_token;
-
-    if (req.headers.authorization) {
-      // Use HTTP Auth header
-      var parts = req.headers.authorization.split(' ');
-      var scheme = parts[0];
-      var credentials = parts[1];
-
-      if (scheme === 'Basic') {
-        // HTTP Basic
-        var userPass = new Buffer(credentials, 'base64')
-          .toString()
-          .split(':');
-        if (userPass.length > 1) {
-          // Base64
-          access_token = userPass[0];
-        } else {
-          // Not Base64
-          access_token = credentials;
-        }
-      } else if (scheme === 'Bearer') {
-        // HTTP Bearer
-        access_token = credentials;
-      } else {
-        // Fallback if access_token is passed directly without scheme
-        access_token = scheme;
-      }
-    } else if (req.query.access_token) {
-      // Use query string
-      access_token = req.query.access_token;
-    }
-
-    return access_token;
   }
 
 });
