@@ -17,6 +17,8 @@ _.extend(_, {
     maxLength: 4096
   }),
 
+  parseFloat: parseFloat,
+
   encodeBase64: function(str) {
     return URLSafeBase64.encode(new Buffer(str, 'utf-8'));
   },

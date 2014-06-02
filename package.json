@@ -26,7 +26,11 @@
     "redis": "^0.10.3",
     "iron_mq": "^0.2.3",
     "express": "^4.3.0",
-    "colors": "^0.6.2"
+    "colors": "^0.6.2",
+    "uuid": "^1.4.1",
+    "moment": "^2.6.0",
+    "eyes": "^0.1.8",
+    "urlsafe-base64": "0.0.2"
   },
   "devDependencies": {
     "mocha": "^1.19.0",

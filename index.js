@@ -27,6 +27,8 @@ Bootie.colors.setTheme({
   error: 'red'
 });
 
+Bootie.mixin = require('./mixin');
+
 // All external libraries
 // ---
 

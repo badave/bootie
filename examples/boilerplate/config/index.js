@@ -3,7 +3,6 @@
 var fs = require('fs');
 var path = require('path');
 var _ = require('lodash');
-var mixin = require('./mixin');
 
 var pjson = require('../package.json');
 var database = require('./database.json');

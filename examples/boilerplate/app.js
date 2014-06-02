@@ -62,7 +62,6 @@ app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
 // Connects to 2 mongo urls
 var database = new Bootie.Database(config.database);
 
-
 // Router
 var TestController = require('./controllers/test');
 var TestCrudController = require('./controllers/test_crud');
