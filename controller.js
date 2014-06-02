@@ -27,6 +27,11 @@ module.exports = Backbone.Model.extend({
 
   path: "/",
 
+  sortParam: "created",
+  sortOrder: "desc",
+  skip: 0,
+  limit: 50,
+
   // Route specific middleware definitions
   // Object or Function
   middleware: function() {
@@ -242,10 +247,10 @@ module.exports = Backbone.Model.extend({
     // Reserved Params
     var since = req.query.since || req.query.from; // validate timestamp (s or ms) [DO NOT USE]
     var until = req.query.until || req.query.to; // validate timestamp (s or ms) [ DO NOT USE]
-    var sortBy = req.query.sort || "created"; // validate sortableParams
-    var orderBy = req.query.order || "desc"; // validate [asc, desc]
-    var skip = req.query.skip || req.query.offset || 0; // validate int
-    var limit = req.query.limit || req.query.count || 50; // validate int
+    var sortBy = req.query.sort || this.sortParam; // validate sortableParams
+    var orderBy = req.query.order || this.sortOrder; // validate [asc, desc]
+    var skip = req.query.skip || req.query.offset || this.skip; // validate int
+    var limit = req.query.limit || req.query.count || this.limit; // validate int
 
     // Build created, updated objects into the query string if sent in as dot notation
     _.each(req.query, function(obj, key) {
@@ -375,6 +380,10 @@ module.exports = Backbone.Model.extend({
       } else if (type === 'integer') {
         // integers
         val = _.parseInt(val);
+        filter[key] = val;
+      } else if (type === 'float') {
+        // floats
+        val = parseFloat(val);
         filter[key] = val;
       } else {
         // invalid or unknown type
