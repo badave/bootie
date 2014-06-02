@@ -1,5 +1,9 @@
 "use strict";
 
+// References
+// ---
+// https://github.com/petkaantonov/bluebird/issues/70
+
 // Dependencies
 // ---
 // Depends on `config` to be a global variable

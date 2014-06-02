@@ -32,6 +32,7 @@ app.use(compress());
 
 // Logger
 // app.use(morgan('dev'));
+// Don't log 304
 app.use(morgan({
   // format: 'dev',
   format: ':method :url :status - :remote-addr | :user-agent - :date - :response-time ms',
