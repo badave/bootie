@@ -307,7 +307,7 @@ While developing [Celery's](https://trycelery.com) new API, we first started out
 ## TODO
 
 - More unit test coverage
-- 
+
 ---
 
 ## References
