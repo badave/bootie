@@ -18,7 +18,7 @@ module.exports = Backbone.Model.extend({
   defaults: function() {
     return {
       // Each `key: value` pair should consist of `name: url`
-      mongos: {},
+      mongodbs: {},
 
       // Keys: port, host, auth
       caches: {}
@@ -26,11 +26,11 @@ module.exports = Backbone.Model.extend({
   },
 
   initialize: function() {
-    this.mongos = {};
+    this.mongodbs = {};
     this.caches = {};
     
     // Setup all configured mongo connections
-    _.each(this.get('mongos'), function(val, key) {
+    _.each(this.get('mongodbs'), function(val, key) {
       this.setupMongo(key, val);
     }.bind(this));
 
@@ -69,22 +69,22 @@ module.exports = Backbone.Model.extend({
   },
 
   setupMongo: function(name, url) {
-    this.mongos[name] = new Mongo(url);
+    this.mongodbs[name] = new Mongo(url);
     
     // Events
-    this.mongos[name].on("connect", function(url) {
+    this.mongodbs[name].on("connect", function(url) {
       if (this.debug) {
         console.log("Mongo %s (%d) connected to url: %s".info, name, process.pid, url);
       }
     }.bind(this));
 
-    this.mongos[name].on("error", function(error) {
+    this.mongodbs[name].on("error", function(error) {
       if (this.debug) {
         console.error("Mongo %s (%d) connect error to url: %s -> %s".error, name, process.pid, url, error.message);
       }
     }.bind(this));
 
     // Connect
-    this.mongos[name].connect();
+    this.mongodbs[name].connect();
   }
 });

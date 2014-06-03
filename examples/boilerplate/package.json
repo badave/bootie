@@ -18,7 +18,8 @@
     "uuid": "^1.4.1",
     "moment": "^2.6.0",
     "eyes": "^0.1.8",
-    "urlsafe-base64": "0.0.2"
+    "urlsafe-base64": "0.0.2",
+    "hbs": "^2.7.0"
   },
   "devDependencies": {},
   "scripts": {

@@ -1,8 +1,8 @@
 "use strict";
 
+var _ = require('lodash');
 var fs = require('fs');
 var path = require('path');
-var _ = require('lodash');
 
 var pjson = require('../package.json');
 var database = require('./database.json');

@@ -4,23 +4,37 @@
 var _ = require('lodash');
 var express = require('express');
 var path = require('path');
-var Bootie = require('bootie');
+var env = process.env['NODE_ENV'] || 'development';
+var port = process.env['PORT'] || 1337;
+var pid = process.pid;
 
 // Middleware
+var cors = require('cors');
 var bodyParser = require('body-parser');
 var compress = require('compression');
 var methodOverride = require('method-override');
 var morgan  = require('morgan');
 var favicon = require('serve-favicon');
+var hbs = require('hbs');
 
-// Express app
+// Bootie
+var Bootie = require('bootie');
+
+
+
+
+// Start express app
 var app = express();
-var env = process.env.NODE_ENV;
+app.set('port', port);
+app.enable('trust proxy'); // This lets req.ip show the real IP address on Heroku
 
 
 // Config
 var config = require('./config');
 app.use(config.middleware);
+
+
+
 
 // Middleware before Router
 
@@ -40,6 +54,9 @@ app.use(morgan({
     return res.statusCode === 304;
   }
 }));
+
+// Enable CORS
+app.use(cors());
 
 // Support pseudo PUT/DELETE via headers
 app.use(methodOverride());
@@ -72,7 +89,7 @@ var router = new Bootie.Router({
   controllers: {
     test: new TestController(),
     test_crud: new TestCrudController({
-      db: database.mongos.primary,
+      db: database.mongodbs.primary,
       cache: database.caches.primary
     })
   }
@@ -87,6 +104,6 @@ _.each(router.routes, function(route) {
 
 
 // Start the HTTP server
-var server = app.listen(1337, function() {
+var server = app.listen(app.get('port'), function() {
   console.log('Listening on port %d', server.address().port);
 });
