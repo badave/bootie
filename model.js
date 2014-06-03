@@ -46,6 +46,11 @@ module.exports = Backbone.Model.extend({
     this.set(body);
   },
 
+  // Alias for `render`
+  toResponse: function() {
+    return this.render();
+  },
+
   // Picks an explicit set of attributes to include in the response
   // There are 2 arrays (public and private) that determine which attributes are included
   render: function() {
