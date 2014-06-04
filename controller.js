@@ -354,14 +354,22 @@ module.exports = Backbone.Model.extend({
     }
 
     // Filter Params
-    var allowedParams = _.extend(_.result(this, 'queryParams'), {
+    var queryParams = _.extend(_.result(this, 'queryParams'), {
       "user_id": "string"
     });
-    var queryParams = _.pick(req.query, _.keys(allowedParams));
+    var filterParams = _.pick(req.query, _.keys(queryParams));
 
-    _.each(queryParams, function(val, key) {
+    _.each(filterParams, function(val, key) {
       // If value is all, ignore this param
       if (val === 'all') {
+        return;
+      }
+
+      // Support `,` as `$or` for each param
+      var vals = val.split(',');
+
+      // No value, ignore this param
+      if (vals.length === 0) {
         return;
       }
 
@@ -369,29 +377,52 @@ module.exports = Backbone.Model.extend({
       var filter = {};
 
       // Get param type
-      var type = allowedParams[key];
+      var type = queryParams[key];
 
       // Deal with different param types
-      if (type === 'regex') {
-        // regex case insensitive and escaping special characters
-        filter[key] = {
-          "$regex": '^' + _.escapeRegExp(val),
-          "$options": 'i'
-        };
-      } else if (type === 'string') {
+      if (type === 'string') {
         // strings and objectid
-        filter[key] = val;
+        // no transformation
+      } else if (type === 'regex') {
+        // regex case insensitive and escaping special characters
+        vals = _.map(vals, function(v) {
+          return {
+            "$regex": '^' + _.escapeRegExp(v),
+            "$options": 'i'
+          };
+        });
+        // filter[key] = {
+        //   "$regex": '^' + _.escapeRegExp(val),
+        //   "$options": 'i'
+        // };
       } else if (type === 'integer') {
         // integers
-        val = _.parseInt(val);
-        filter[key] = val;
+        vals = _.map(vals, function(v) {
+          return _.parseInt(v);
+        });
+        // val = _.parseInt(val);
       } else if (type === 'float') {
         // floats
-        val = parseFloat(val);
-        filter[key] = val;
+        vals = _.map(vals, function(v) {
+          return _.parseFloat(v);
+        });
+        // val = parseFloat(val);
       } else {
         // invalid or unknown type
         return;
+      }
+
+      // If there is only one val, no need to use `$or`
+      if (vals.length === 1) {
+        filter[key] = vals[0];
+      } else {
+        var orExpr = [];
+        _.each(vals, function(orVal) {
+          var orClause = {};
+          orClause[key] = orVal;
+          orExpr.push(orClause);
+        });
+        filter["$or"] = orExpr;
       }
 
       queries.push(filter);

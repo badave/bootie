@@ -15,17 +15,17 @@ module.exports = Bootie.Model.extend({
       version: 'v2'
     };
   },
-  
+
   baseSchema: function() {
     return {
-      _id: String,
-      user_id: String,
-      created: Number,
-      updated: Number,
-      created_date: Date,
-      updated_date: Date,
-      metadata: Object,
-      version: String
+      _id: 'string',
+      user_id: 'string',
+      created: 'integer',
+      updated: 'integer',
+      created_date: 'date',
+      updated_date: 'date',
+      metadata: 'object',
+      version: 'string'
     };
   }
 });

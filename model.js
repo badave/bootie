@@ -33,6 +33,12 @@ module.exports = Backbone.Model.extend({
 
   // Define the types of each attribute
   // Object or Function
+  // key: 'string'
+  // key: 'integer'
+  // key: 'float'
+  // key: 'date'
+  // key: {inner_key: 'string'}
+  // key: ['string']
   schema: function() {},
 
   // Attributes that should be included in all responses
@@ -77,7 +83,7 @@ module.exports = Backbone.Model.extend({
     var response = {};
     _.each(schema, function(val, key) {
       if (_.isArray(val)) {
-        if (_.isFunction(val[0])) {
+        if (_.isString(val[0])) {
           // If the value for this key is an array of `Type`
           response[key] = json[key];
         } else {
@@ -87,7 +93,7 @@ module.exports = Backbone.Model.extend({
             response[key].push(this.buildResponse(val[0], arrVal));
           }.bind(this));
         }
-      } else if (_.isFunction(val)) {
+      } else if (_.isString(val)) {
         response[key] = json[key];
       } else if (_.isObject(val)) {
         response[key] = this.buildResponse(schema[key], json[key]);
