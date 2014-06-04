@@ -159,7 +159,15 @@ module.exports = Controller.extend({
 
   destroy: function(req, res, next) {
     var model = this.setupModel(req);
-    return model.destroy().then(this.nextThen(req, res, next)).catch(this.nextCatch(req, res, next));
+    return model.destroy().then(function(resp) {
+      if (resp === 0) {
+        var err = new Error("Document not found.");
+        err.code = 404;
+        return next(err);
+      }
+
+      return next();
+    }).catch(this.nextCatch(req, res, next));
   },
 
 
