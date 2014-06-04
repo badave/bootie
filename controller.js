@@ -177,7 +177,11 @@ module.exports = Backbone.Model.extend({
     // TODO
     // We should log these errors somewhere remotely
     if (this.debug) {
-      console.log(err.stack.error);
+      if (res.code >= 500) {
+        console.error(err.stack.error);
+      } else {
+        console.error("Error (%d): %s".error, res.code, err.message);
+      }
     }
 
     res.data = envelope;
