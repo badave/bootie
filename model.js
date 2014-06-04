@@ -27,6 +27,10 @@ module.exports = Backbone.Model.extend({
   // Object or Function
   defaults: function() {},
 
+  // Defaults that should be applied to all models
+  // Object or Function
+  baseDefaults: function() {},
+
   // Define the types of each attribute
   // Object or Function
   schema: function() {},
@@ -40,12 +44,12 @@ module.exports = Backbone.Model.extend({
   // `db`
   // `cache`
 
-  // constructor: function() {
-  //   // Generate defaults from schema
-  //   var schema = _.result(this, 'schema');
-    
-  //   return Backbone.Model.prototype.constructor.apply(this, arguments);
-  // },
+  constructor: function() {
+    Backbone.Model.prototype.constructor.apply(this, arguments);
+
+    // Apply `baseDefaults`
+    _.defaults(this.attributes, _.result(this, 'baseDefaults'));    
+  },
 
   initialize: function() {},
 
@@ -194,6 +198,7 @@ module.exports = Backbone.Model.extend({
   },
 
   // Removes a mongodb document
+  // Must have ID
   delete: function(model, options) {
     // If no ID in query, error out
     if (model.isNew()) {
@@ -206,7 +211,7 @@ module.exports = Backbone.Model.extend({
     var query = {};
     query[this.idAttribute] = model.id;
 
-    return this.db.remove(this.urlRoot, query, this.wrapResponse(options)).return(this);
+    return this.db.remove(this.urlRoot, query, this.wrapResponse(options));
   },
 
   // Finds a single mongodb document
@@ -231,6 +236,7 @@ module.exports = Backbone.Model.extend({
         query[this.userIdAttribute] = model.get(this.userIdAttribute);
       }
     }
+
 
     var mongoOptions = _.pick(options, ["require"]) || {};
     return this.db.findOne(this.urlRoot, query, mongoOptions, this.wrapResponse(options)).return(this);
