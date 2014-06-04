@@ -3,5 +3,16 @@
 var Bootie = require('bootie');
 
 module.exports = Bootie.Model.extend({
-  privateAttributes: ['_id', 'user_id', 'created', 'updated', 'created_date', 'updated_date', 'metadata', 'description', 'version']
+  baseSchema: function() {
+    return {
+      _id: String,
+      user_id: String,
+      created: Number,
+      updated: Number,
+      created_date: Date,
+      updated_date: Date,
+      metadata: Object,
+      version: String
+    };
+  }
 });

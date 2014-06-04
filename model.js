@@ -16,19 +16,36 @@ module.exports = Backbone.Model.extend({
   // The mongodb collection name
   urlRoot: "models",
 
-  // Private attributes to be included in the response
-  // Should set this once in a base model that other models inherit from
-  privateAttributes: [],
+  // The defaults hash (or function) can be used to specify the default attributes for your model. 
+  // When creating an instance of the model, 
+  // any unspecified attributes will be set to their default value.
+  // 
+  // Remember that in JavaScript, objects are passed by reference, 
+  // so if you include an object as a default value, 
+  // it will be shared among all instances. 
+  // Instead, define defaults as a function.
+  // Object or Function
+  defaults: function() {},
 
-  // Attributes to be included in the response
-  // Should be optionally set explicitly in each model
-  publicAttributes: [],
+  // Define the types of each attribute
+  // Object or Function
+  schema: function() {},
 
+  // Attributes that should be included in all responses
+  // Object or Function
+  baseSchema: function() {},
 
   // Instance properties
   // ---
   // `db`
   // `cache`
+
+  // constructor: function() {
+  //   // Generate defaults from schema
+  //   var schema = _.result(this, 'schema');
+    
+  //   return Backbone.Model.prototype.constructor.apply(this, arguments);
+  // },
 
   initialize: function() {},
 
@@ -51,19 +68,43 @@ module.exports = Backbone.Model.extend({
     return this.render();
   },
 
-  // Picks an explicit set of attributes to include in the response
-  // There are 2 arrays (public and private) that determine which attributes are included
-  render: function() {
-    var json = this.toJSON();
+  // Builds a response based on schema and the model
+  buildResponse: function(schema, json) {
+    var response = {};
+    _.each(schema, function(val, key) {
+      if (_.isArray(val)) {
+        if (_.isFunction(val[0])) {
+          // If the value for this key is an array of `Type`
+          response[key] = json[key];
+        } else {
+          // If the value for this key is an array of `Object`
+          response[key] = [];
+          _.each(json[key], function(arrVal, arrKey) {
+            response[key].push(this.buildResponse(val[0], arrVal));
+          }.bind(this));
+        }
+      } else if (_.isFunction(val)) {
+        response[key] = json[key];
+      } else if (_.isObject(val)) {
+        response[key] = this.buildResponse(schema[key], json[key]);
+      }
+    }.bind(this));
+    return response;
+  },
 
-    // If there are no public attributes defined, return all
-    if (_.isEmpty(this.publicAttributes)) {
+  render: function() {
+    // If there is no schema defined, return all attributes
+    var schema = _.result(this, 'schema');
+    if (_.isEmpty(_.result(this, 'schema'))) {
       return this.toJSON();
     }
 
-    // Otherwise, pick only the union of private and public attributes
-    var responseJSON = _.pick(json, _.union(this.privateAttributes, this.publicAttributes));
-    return responseJSON;
+    // Merge the `baseSchema` with the defined `schema`
+    _.merge(schema, _.result(this, 'baseSchema'));
+
+    // Build the response
+    var response = this.buildResponse(schema, this.toJSON());
+    return response;
   },
 
   // TODO
