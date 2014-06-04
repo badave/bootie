@@ -103,10 +103,10 @@ module.exports = Controller.extend({
     var qo = this.parseQueryString(req);
     var collection = this.setupCollection(req, qo);
 
-    // Override query
-    if (options && options.query) {
-      _.extend(qo.query, options.query);
-    }
+    options = options || {};
+    _.merge(options, {
+      query: qo.query
+    });
 
     if (this.debug) {
       console.log("Find with Query: %s".verbose, JSON.stringify(qo));
@@ -127,16 +127,22 @@ module.exports = Controller.extend({
     }).then(this.nextThen(req, res, next)).catch(this.nextCatch(req, res, next));
   },
 
-  findOne: function(req, res, next) {
+  findOne: function(req, res, next, options) {
     var model = this.setupModel(req);
+    options = options || {};
+    _.merge(options, {
+      require: true
+    });
 
     if (this.debug) {
-      console.log("Find with ID: %s".verbose, model.id);
+      if (options.query) {
+        console.log("Find with Query: %s and UserID: %s".verbose, JSON.stringify(options.query), model.get('user_id'));
+      } else {
+        console.log("Find with ID: %s and UserID: %s".verbose, model.id, model.get('user_id'));
+      }
     }
 
-    return model.fetch({
-      require: true
-    }).then(this.nextThen(req, res, next)).catch(this.nextCatch(req, res, next));
+    return model.fetch(options).then(this.nextThen(req, res, next)).catch(this.nextCatch(req, res, next));
   },
 
   create: function(req, res, next) {
