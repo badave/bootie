@@ -106,7 +106,7 @@ module.exports = Backbone.Model.extend({
 
   // Inserts a mongodb document
   create: function(model, options) {
-    return this.db.insert(this.urlRoot, model.toJSON(), this.wrapResponse(options));
+    return this.db.insert(this.urlRoot, model.toJSON(), this.wrapResponse(options)).return(this);
   },
 
   // Updates a mongodb document
@@ -123,7 +123,7 @@ module.exports = Backbone.Model.extend({
     var query = {};
     query[this.idAttribute] = model.id;
 
-    return this.db.findAndModify(this.urlRoot, query, model.toJSON(), this.wrapResponse(options));
+    return this.db.findAndModify(this.urlRoot, query, model.toJSON(), this.wrapResponse(options)).return(this);
   },
 
   // Updates a mongodb document
@@ -149,7 +149,7 @@ module.exports = Backbone.Model.extend({
       "$set": attrs
     };
 
-    return this.db.findAndModify(this.urlRoot, query, obj, this.wrapResponse(options));
+    return this.db.findAndModify(this.urlRoot, query, obj, this.wrapResponse(options)).return(this);
   },
 
   // Removes a mongodb document
@@ -165,7 +165,7 @@ module.exports = Backbone.Model.extend({
     var query = {};
     query[this.idAttribute] = model.id;
 
-    return this.db.remove(this.urlRoot, query, this.wrapResponse(options));
+    return this.db.remove(this.urlRoot, query, this.wrapResponse(options)).return(this);
   },
 
   // Finds a single mongodb document
@@ -192,7 +192,7 @@ module.exports = Backbone.Model.extend({
     }
 
     var mongoOptions = _.pick(options, ["require"]) || {};
-    return this.db.findOne(this.urlRoot, query, mongoOptions, this.wrapResponse(options));
+    return this.db.findOne(this.urlRoot, query, mongoOptions, this.wrapResponse(options)).return(this);
   }
 
 });

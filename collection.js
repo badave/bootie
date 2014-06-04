@@ -63,7 +63,7 @@ module.exports = Backbone.Collection.extend({
 
     // Build query with optional: limit, skip, sort
     var mongoOptions = _.pick(options, ["limit", "skip", "sort"]) || {};
-    return this.db.find(this.model.prototype.urlRoot, query, mongoOptions, this.wrapResponse(options));
+    return this.db.find(this.model.prototype.urlRoot, query, mongoOptions, this.wrapResponse(options)).return(this);
   },
 
 
