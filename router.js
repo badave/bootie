@@ -64,5 +64,10 @@ module.exports = function(options) {
     });
   }
 
+  _.each(router.routes, function(route) {
+    console.log("Route: [%s] %s", route.method, route.url + route.path);
+  });
+
+
   return router;
 };

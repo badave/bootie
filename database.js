@@ -45,10 +45,17 @@ module.exports = Backbone.Model.extend({
       return;
     }
 
+    // Connection string
+    var connString = '';
+
     var redisClient = redis.createClient(options.port, options.host);
     if (options.auth) {
       redisClient.auth(options.auth);
+      connString += options.auth + "@";
     }
+    connString += options.host;
+    connString += ':';
+    connString += options.port;
     this.caches[name] = redisClient;
 
     // Catching this error event will prevent node from exiting
@@ -56,16 +63,11 @@ module.exports = Backbone.Model.extend({
       console.error("Redis %d connect error to url: %s - %s".error, process.pid, connString, err.message);
     }.bind(this));
 
-    if (this.debug) {
-      var connString = '';
-      if (options.auth) {
-        connString += options.auth + "@";
+    this.caches[name].on('ready', function() {
+      if (this.debug) {
+        console.log("Redis %d connected to url: %s".info, process.pid, connString);
       }
-      connString += options.host;
-      connString += ':';
-      connString += options.port;
-      console.log("Redis %d connected to url: %s", process.pid, connString);
-    }
+    }.bind(this));
   },
 
   setupMongo: function(name, url) {
@@ -79,9 +81,7 @@ module.exports = Backbone.Model.extend({
     }.bind(this));
 
     this.mongodbs[name].on("error", function(error) {
-      if (this.debug) {
-        console.error("Mongo %s (%d) connect error to url: %s -> %s".error, name, process.pid, url, error.message);
-      }
+      console.error("Mongo %s (%d) connect error to url: %s -> %s".error, name, process.pid, url, error.message);
     }.bind(this));
 
     // Connect

@@ -96,10 +96,6 @@ var router = new Bootie.Router({
 });
 app.use(router.url, router);
 
-_.each(router.routes, function(route) {
-  console.log("Route: [%s] %s", route.method, route.url + route.path);
-});
-
 // Middleware after Router
 
 
