@@ -12,6 +12,7 @@ module.exports = Bootie.Model.extend({
       created_date: new Date(),
       updated_date: new Date(),
       metadata: {},
+      locked: false,
       version: 'v2'
     };
   },
@@ -25,6 +26,7 @@ module.exports = Bootie.Model.extend({
       created_date: 'date',
       updated_date: 'date',
       metadata: 'object',
+      locked: 'boolean',
       version: 'string'
     };
   }

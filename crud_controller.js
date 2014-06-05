@@ -98,7 +98,7 @@ module.exports = Controller.extend({
 
   // CRUD functions
   // ---
-  
+
   find: function(req, res, next, options) {
     var qo = this.parseQueryString(req);
     var collection = this.setupCollection(req, qo);

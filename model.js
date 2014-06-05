@@ -60,7 +60,7 @@ module.exports = Backbone.Model.extend({
     Backbone.Model.prototype.constructor.apply(this, arguments);
 
     // Apply `baseDefaults`
-    _.defaults(this.attributes, _.result(this, 'baseDefaults'));    
+    _.defaults(this.attributes, _.result(this, 'baseDefaults'));
   },
 
   initialize: function() {},
@@ -130,6 +130,27 @@ module.exports = Backbone.Model.extend({
   //     resolve(Backbone.Model.prototype.fetch.call(this, options));
   //   }.bind(this));
   // },
+
+  // Transactions
+  // Applies a boolean flag called `locked`
+  lock: function() {
+    if (this.get('locked')) {
+      var err = new Error("Model already locked.");
+      return Promise.reject(err);
+    }
+
+    this.set('locked', true);
+    return this.save();
+  },
+
+  unlock: function() {
+    if (!this.get('locked')) {
+      return Promise.resolve(this);
+    }
+
+    this.set('locked', false);
+    return this.save();
+  },
 
 
   // Override the backbone sync method for use with mongodb
