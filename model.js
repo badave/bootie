@@ -45,6 +45,8 @@ module.exports = Backbone.Model.extend({
   // key: 'date'
   // key: {inner_key: 'string'}
   // key: ['string']
+  // key: [{inner_key: 'string'}]
+  // key: ['model']
   schema: function() {},
 
   // Attributes that should be included in all responses
@@ -101,8 +103,10 @@ module.exports = Backbone.Model.extend({
         }
       } else if (_.isString(val)) {
         response[key] = json[key];
-      } else if (_.isObject(val)) {
+      } else if (_.isObject(val) && !_.isEmpty(val)) {
         response[key] = this.buildResponse(schema[key], json[key]);
+      } else {
+        response[key] = json[key];
       }
     }.bind(this));
     return response;
