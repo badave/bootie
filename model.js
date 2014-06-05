@@ -25,6 +25,12 @@ module.exports = Backbone.Model.extend({
   // it will be shared among all instances. 
   // Instead, define defaults as a function.
   // Object or Function
+  // string: null
+  // integer: 0
+  // float: 0.0
+  // boolean: true or false
+  // object: {}
+  // array: []
   defaults: function() {},
 
   // Defaults that should be applied to all models
@@ -139,6 +145,12 @@ module.exports = Backbone.Model.extend({
     if (this.debug) {
       console.log("Sync called with method: %s", method);
     }
+
+    // Force all `update` to actually be `patch`
+    if (method === 'update') {
+      method = 'patch';
+    }
+
     var op = this[method].call(this, model, options);
     model.trigger("request", model, op, options);
     return op;
