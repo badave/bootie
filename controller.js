@@ -256,6 +256,9 @@ module.exports = Backbone.Model.extend({
     var skip = req.query.skip || req.query.offset || this.skip; // validate int
     var limit = req.query.limit || req.query.count || this.limit; // validate int
 
+    // Hard limit at 100
+    limit = Math.min(limit, 100);
+
     // Build created, updated objects into the query string if sent in as dot notation
     _.each(req.query, function(obj, key) {
       var match;
@@ -387,7 +390,8 @@ module.exports = Backbone.Model.extend({
         // regex case insensitive and escaping special characters
         vals = _.map(vals, function(v) {
           return {
-            "$regex": '^' + _.escapeRegExp(v),
+            // "$regex": '^' + _.escapeRegExp(v),
+            "$regex": _.escapeRegExp(v),
             "$options": 'i'
           };
         });
