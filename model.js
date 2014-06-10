@@ -1,5 +1,9 @@
 "use strict";
 
+// References
+// ---
+// https://github.com/jsantell/backbone-promised/blob/master/index.js
+
 // Dependencies
 // ---
 var _ = require('lodash');
@@ -15,6 +19,9 @@ module.exports = Backbone.Model.extend({
 
   // The mongodb collection name
   urlRoot: "models",
+
+  // Flag to force all updates to be patches on `sync`
+  updateUsingPatch: true,
 
   // The defaults hash (or function) can be used to specify the default attributes for your model. 
   // When creating an instance of the model, 
@@ -127,13 +134,19 @@ module.exports = Backbone.Model.extend({
     return response;
   },
 
-  // TODO
-  // https://github.com/jsantell/backbone-promised/blob/master/index.js
-  // fetch: function(options) {
-  //   return new Promise(function(resolve, reject) {
-  //     resolve(Backbone.Model.prototype.fetch.call(this, options));
-  //   }.bind(this));
-  // },
+  // Return a rejected promise if validation fails
+  // Bubble up the `validationError` from Backbone
+  save: function() {
+    var op = Backbone.Model.prototype.save.apply(this, arguments);
+
+    if (!op) {
+      return Promise.reject(this.validationError);
+    }
+
+    return op;
+  },
+
+
 
   // Transactions
   // Applies a boolean flag called `locked`
@@ -171,8 +184,8 @@ module.exports = Backbone.Model.extend({
       console.log("Sync called with method: %s", method);
     }
 
-    // Force all `update` to actually be `patch`
-    if (method === 'update') {
+    // Force all `update` to actually be `patch` if configured
+    if (this.updateUsingPatch && method === 'update') {
       method = 'patch';
     }
 

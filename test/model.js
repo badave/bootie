@@ -73,10 +73,16 @@ describe("Models", function() {
 
     model.on("invalid", function(model, error, options) {
       (error instanceof Error).should.be.true;
-      done();
+      // done();
     });
 
-    model.save();
+    model.save().bind(this).then(function() {
+      // should not be called
+    }).catch(function(err) {
+      // console.log(err);
+      (err instanceof Error).should.be.true;
+      done();
+    });
   });
 
   it("should save with update", function(done) {
