@@ -83,6 +83,19 @@ module.exports = Backbone.Model.extend({
     return resp;
   },
 
+
+  _validate: function(attrs, options) {
+    var valid = Backbone.Model.prototype._validate.apply(this, arguments);
+
+    if (!valid) {
+      return false;
+    }
+
+    // TODO: Perform `schema` validation here
+
+    return true;
+  },
+
   // Do any request body sanitation here
   setFromRequest: function(body) {
     this.set(body);
@@ -93,7 +106,7 @@ module.exports = Backbone.Model.extend({
     return this.render();
   },
 
-  // Builds a response based on schema and the model
+  // Builds a response based on `schema` and the model
   buildResponse: function(schema, json) {
     var response = {};
     _.each(schema, function(val, key) {
