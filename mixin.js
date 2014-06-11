@@ -19,6 +19,28 @@ _.extend(_, {
 
   parseFloat: parseFloat,
 
+  // Encrypts a utf8 string into an encrypted hex string
+  encryptString: function(str, algorithm, key) {
+    algorithm = algorithm || 'aes256';
+    // Obviously don't reuse this key
+    key = key || '13741c7ec3a809950ed8e75c1abcfa0e8f9994b2b79d7a895c2e383f28c8a792';
+
+    var cipher = crypto.createCipher(algorithm, key);
+    cipher.update(str, 'utf8');
+    return cipher.final('hex');
+  },
+
+  // Decrypts an encrypted hex string back into a utf8 string
+  decryptString: function(str, algorithm, key) {
+    algorithm = algorithm || 'aes256';
+    // Obviously don't reuse this key
+    key = key || '13741c7ec3a809950ed8e75c1abcfa0e8f9994b2b79d7a895c2e383f28c8a792';
+
+    var decipher = crypto.createDecipher(algorithm, key);
+    decipher.update(str, 'hex');
+    return decipher.final('utf8');
+  },
+
   encodeBase64: function(str) {
     return URLSafeBase64.encode(new Buffer(str, 'utf-8'));
   },
