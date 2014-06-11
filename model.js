@@ -107,6 +107,9 @@ module.exports = Backbone.Model.extend({
   },
 
   // Builds a response based on `schema` and the model
+  // There is a flaw where if the schema doesn't match the database
+  // For nested objects that don't exist 
+  // it might throw a `Cannot read property of undefined` error
   buildResponse: function(schema, json) {
     var response = {};
     _.each(schema, function(val, key) {
