@@ -38,6 +38,18 @@ _.extend(_, {
     return true;
   },
 
+  sanitizeEmail: function(email) {
+    return email.trim().toLowerCase();
+  },
+
+  isValidEmail: function(email) {
+    if (email && typeof(email) === "string" && email.length > 0 && email.match(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i)) {
+      return true;
+    } else {
+      return false;
+    }
+  },
+
   isValidISO8601String: function(str) {
     // 2013-11-18T09:04:24.447Z
     // YYYY-MM-DDTHH:mm:ss.SSSZ
