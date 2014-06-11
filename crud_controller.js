@@ -166,6 +166,7 @@ module.exports = Controller.extend({
         return next(err);
       }
 
+      res.code = 204;
       return next();
     }).catch(this.nextCatch(req, res, next));
   },

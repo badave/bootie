@@ -156,7 +156,11 @@ module.exports = Backbone.Model.extend({
       envelope.meta.paging = res.paging;
     }
 
-    res.data = envelope;
+    if (res.code === 204) {
+      res.data = null;
+    } else {
+      res.data = envelope;
+    }
     next();
   },
 
@@ -178,7 +182,9 @@ module.exports = Backbone.Model.extend({
     // We should log these errors somewhere remotely
     if (this.debug) {
       if (res.code >= 500) {
-        console.error(err.stack.error);
+        if (err && err.stack && err.stack.error) {
+          console.error(err.stack.error);
+        }
       } else {
         console.error("Error (%d): %s".error, res.code, err.message);
       }
