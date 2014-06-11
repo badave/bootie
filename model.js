@@ -111,7 +111,10 @@ module.exports = Backbone.Model.extend({
     var response = {};
     _.each(schema, function(val, key) {
       if (_.isArray(val)) {
-        if (_.isString(val[0])) {
+        if (val.length === 0) {
+          // Empty array
+          response[key] = json[key];
+        } else if (_.isString(val[0])) {
           // If the value for this key is an array of `Type`
           response[key] = json[key];
         } else {
