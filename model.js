@@ -97,8 +97,16 @@ module.exports = Backbone.Model.extend({
   },
 
   // Do any request body sanitation here
+  // TODO: support deep set
   setFromRequest: function(body) {
+    // Trigger changed
     this.set(body);
+
+    // To support a `patch` operation
+    // We're gonna `default/extend` all existing attributes after the `set`
+    var attrs = {};
+    _.merge(attrs, this.previousAttributes(), this.attributes, body);
+    this.attributes = attrs;
   },
 
   // Alias for `render`
