@@ -41,7 +41,11 @@ describe("Models", function() {
   it("should save with create and events", function(done) {
     var model = new Model({
       cid: _.random(1, 65535),
-      name: "Pedro Sanchez"
+      name: "Pedro Sanchez",
+      address: {
+        city: "Los Angeles",
+        state: "CA"
+      }
     });
 
     var requestEventFired = false;
@@ -88,13 +92,25 @@ describe("Models", function() {
   it("should save with update", function(done) {
     var model = new Model({
       _id: savedId,
-      name: "Hugh Bowner"
+      name: "Hugh Bowner",
+      address: {
+        city: "Los Santos",
+        zip: "90210"
+      }
     });
     model.save(null, {
       success: function(model, resp, options) {
         model.attributes.should.not.be.empty;
         should.exist(model.id);
         model.get("name").should.equal("Hugh Bowner");
+
+        // shallow get
+        model.get("address").city.should.equal("Los Santos");
+        model.get("address").state.should.equal("CA");
+
+        // deep get
+        model.get("address.city").should.equal("Los Santos");
+        model.get("address.state").should.equal("CA");
         done();
       }
     });

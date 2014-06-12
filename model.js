@@ -188,6 +188,72 @@ module.exports = Backbone.Model.extend({
     return this.save();
   },
 
+  // Convert all nested objects into dot notation keypaths (for `$set` patch)
+  objToPaths: function(obj) {
+    var ret = {};
+    var separator = '.';
+
+    _.each(obj, function(val, key) {
+      if (_.isObject(val) && !_.isArray(val) && !_.isEmpty(val)) {
+        //Recursion for embedded objects
+        var obj2 = this.objToPaths(val);
+
+        for (var key2 in obj2) {
+          var val2 = obj2[key2];
+
+          ret[key + separator + key2] = val2;
+        }
+      } else {
+        ret[key] = val;
+      }
+    }.bind(this));
+
+    return ret;
+  },
+
+  // Tested and working with both shallow and deep keypaths
+  get: function(attr) {
+    if (!_.isString(attr)) {
+      return undefined;
+    }
+
+    return this.getDeep(this.attributes, attr);
+  },
+
+  // Support dot notation of accessing nested keypaths
+  getDeep: function(attrs, attr) {
+    var keys = attr.split('.');
+    var key;
+    var val = attrs;
+    var context = this;
+
+    for (var i = 0, n = keys.length; i < n; i++) {
+      // get key
+      key = keys[i];
+
+      // Hold reference to the context when diving deep into nested keys
+      if (i > 0) {
+        context = val;
+      }
+
+      // get value for key
+      val = val[key];
+
+      // value for key does not exist
+      // break out of loop early
+      if (_.isUndefined(val) || _.isNull(val)) {
+        break;
+      }
+    }
+
+    // Eval computed properties that are functions
+    if (_.isFunction(val)) {
+      // Call it with the proper context (see above)
+      val = val.call(context);
+    }
+
+    return val;
+  },
 
   // Override the backbone sync method for use with mongodb
   // options contains 2 callbacks: `success` and `error`
@@ -265,8 +331,9 @@ module.exports = Backbone.Model.extend({
     delete attrs[this.idAttribute];
 
     // Use mongodb set to only update explicit attributes
+    // Convert all nested objects into paths so `$set` doesn't overwrite nested objects
     var obj = {
-      "$set": attrs
+      "$set": this.objToPaths(attrs)
     };
 
     return this.db.findAndModify(this.urlRoot, query, obj, this.wrapResponse(options)).return(this);
