@@ -20,25 +20,34 @@ _.extend(_, {
   parseFloat: parseFloat,
 
   // Encrypts a utf8 string into an encrypted hex string
+  // https://github.com/joyent/node/issues/6386
   encryptString: function(str, algorithm, key) {
+    var inputEncoding = 'utf8';
+    var outputEncoding = 'hex';
+
     algorithm = algorithm || 'aes256';
     // Obviously don't reuse this key
     key = key || '13741c7ec3a809950ed8e75c1abcfa0e8f9994b2b79d7a895c2e383f28c8a792';
 
     var cipher = crypto.createCipher(algorithm, key);
-    cipher.update(str, 'utf8');
-    return cipher.final('hex');
+    var ciphered = cipher.update(str, inputEncoding, outputEncoding);
+    ciphered += cipher.final(outputEncoding);
+    return ciphered;
   },
 
   // Decrypts an encrypted hex string back into a utf8 string
+  // https://github.com/joyent/node/issues/6386
   decryptString: function(str, algorithm, key) {
+    var inputEncoding = 'utf8';
+    var outputEncoding = 'hex';
     algorithm = algorithm || 'aes256';
     // Obviously don't reuse this key
     key = key || '13741c7ec3a809950ed8e75c1abcfa0e8f9994b2b79d7a895c2e383f28c8a792';
 
     var decipher = crypto.createDecipher(algorithm, key);
-    decipher.update(str, 'hex');
-    return decipher.final('utf8');
+    var deciphered = decipher.update(str, outputEncoding, inputEncoding);
+    deciphered += decipher.final(inputEncoding);
+    return deciphered;
   },
 
   encodeBase64: function(str) {
