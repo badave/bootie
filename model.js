@@ -70,6 +70,13 @@ module.exports = Backbone.Model.extend({
 
     // Apply `baseDefaults`
     _.defaults(this.attributes, _.result(this, 'baseDefaults'));
+
+    // Whenever a model gets assigned a value for `idAttribute`
+    // We clear out defaults because we assume this is an existing model in the db
+    this.listenTo(this, 'change:' + this.idAttribute, function() {
+      // Clear out all defaults
+      this.clearDefaults();
+    }.bind(this));
   },
 
   initialize: function() {},
@@ -96,10 +103,17 @@ module.exports = Backbone.Model.extend({
     return true;
   },
 
+  clearDefaults: function() {
+    var defaultKeys = _.keys(_.result(this, 'defaults'));
+    _.each(defaultKeys, function(defaultKey) {
+      this.unset(defaultKey);
+    }.bind(this));
+  },
+
   // Do any request body sanitation here
   // TODO: support deep set
   setFromRequest: function(body) {
-    // Trigger changed
+    // Set new attributes
     this.set(body);
 
     // To support a `patch` operation
