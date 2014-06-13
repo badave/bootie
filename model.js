@@ -177,22 +177,42 @@ module.exports = Backbone.Model.extend({
 
   // Lifecycle methods
   // ---
-  // Returns: Promise
+  // Returns: Promise (this)
+
+  beforeFetch: function() {
+    return Promise.resolve(this);
+  },
+
+  afterFetch: function() {
+    return Promise.resolve(this);
+  },
 
   beforeCreate: function() {
-    return Promise.resolve();
+    return Promise.resolve(this);
   },
 
   beforeUpdate: function() {
-    return Promise.resolve();
+    return Promise.resolve(this);
   },
 
   afterCreate: function() {
-    return Promise.resolve();
+    return Promise.resolve(this);
   },
 
   afterUpdate: function() {
-    return Promise.resolve();
+    return Promise.resolve(this);
+  },
+
+  // Adds before/after fetch lifecycle methods
+  // Returns: Promise (this)
+  fetch: function() {
+    var originalArguments = arguments;
+
+    return this.beforeFetch.apply(this, originalArguments).bind(this).then(function() {
+      return Backbone.Model.prototype.fetch.apply(this, originalArguments);
+    }).then(function() {
+      return this.afterFetch.apply(this, originalArguments);
+    });
   },
 
 
