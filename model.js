@@ -175,16 +175,50 @@ module.exports = Backbone.Model.extend({
     return response;
   },
 
+  // Lifecycle methods
+  // ---
+  // Returns: Promise
+
+  beforeCreate: function() {
+    return Promise.resolve();
+  },
+
+  beforeUpdate: function() {
+    return Promise.resolve();
+  },
+
+  afterCreate: function() {
+    return Promise.resolve();
+  },
+
+  afterUpdate: function() {
+    return Promise.resolve();
+  },
+
+
   // Return a rejected promise if validation fails
   // Bubble up the `validationError` from Backbone
   save: function() {
-    var op = Backbone.Model.prototype.save.apply(this, arguments);
+    var originalArguments = arguments;
 
-    if (!op) {
-      return Promise.reject(this.validationError);
+    var beforeFn, afterFn;
+    if (this.isNew()) {
+      beforeFn = this.beforeCreate;
+      afterFn = this.afterCreate;
+    } else {
+      beforeFn = this.beforeUpdate;
+      afterFn = this.afterUpdate;
     }
 
-    return op;
+    return beforeFn.apply(this, originalArguments).bind(this).then(function() {
+      var op = Backbone.Model.prototype.save.apply(this, originalArguments);
+      if (!op) {
+        return Promise.reject(this.validationError);
+      }
+      return op;
+    }).then(function() {
+      return afterFn.apply(this, originalArguments);
+    });
   },
 
 
