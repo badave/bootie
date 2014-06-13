@@ -73,10 +73,10 @@ module.exports = Backbone.Model.extend({
 
     // Whenever a model gets assigned a value for `idAttribute`
     // We clear out defaults because we assume this is an existing model in the db
-    this.listenTo(this, 'change:' + this.idAttribute, function() {
-      // Clear out all defaults
-      this.clearDefaults();
-    }.bind(this));
+    // this.listenTo(this, 'change:' + this.idAttribute, function() {
+    //   // Clear out all defaults
+    //   this.clearDefaults();
+    // }.bind(this));
   },
 
   initialize: function() {},
@@ -103,6 +103,8 @@ module.exports = Backbone.Model.extend({
     return true;
   },
 
+  // Clears out all attributes that were set with `defaults`
+  // Useful for doing mongodb `patch` without first fetching the entire model
   clearDefaults: function() {
     var defaultKeys = _.keys(_.result(this, 'defaults'));
     _.each(defaultKeys, function(defaultKey) {
@@ -173,6 +175,18 @@ module.exports = Backbone.Model.extend({
     // Build the response
     var response = this.buildResponse(schema, this.toJSON());
     return response;
+  },
+
+  optionsFromSave: function(key, val, options) {
+    var attrs;
+    if (key === null || typeof key === 'object') {
+      attrs = key;
+      options = val;
+    } else {
+      (attrs = {})[key] = val;
+    }
+
+    return options = _.extend({validate: true}, options);
   },
 
   // Lifecycle methods
