@@ -232,11 +232,13 @@ module.exports = Backbone.Model.extend({
   fetch: function() {
     var originalArguments = arguments;
 
-    return Promise.cast()
-      .bind(this)
-      .then(this.beforeFetch.bind(this, originalArguments))
-      .then(Backbone.Model.prototype.fetch.bind(this, originalArguments))
-      .then(this.afterFetch.bind(this, originalArguments));
+    return Promise.cast().bind(this).then(function() {
+      return this.beforeFetch.apply(this, originalArguments);
+    }).then(function() {
+      return Backbone.Model.prototype.fetch.apply(this, originalArguments);
+    }).then(function() {
+      return this.afterFetch.apply(this, originalArguments);
+    });
   },
 
 
@@ -254,13 +256,21 @@ module.exports = Backbone.Model.extend({
       afterFn = this.afterUpdate;
     }
 
-    return Promise.cast().bind(this).then(beforeFn.bind(this, originalArguments)).then(this.beforeSave).then(function() {
+    return Promise.cast().bind(this).then(function() {
+      return beforeFn.apply(this, originalArguments);
+    }).then(function() {
+      return this.beforeSave.apply(this, originalArguments);
+    }).then(function() {
       var op = Backbone.Model.prototype.save.apply(this, originalArguments);
       if (!op) {
         return Promise.reject(this.validationError);
       }
       return op;
-    }).then(afterFn.bind(this, originalArguments)).then(this.afterSave);
+    }).then(function() {
+      return afterFn.apply(this, originalArguments);
+    }).then(function() {
+      return this.afterSave.apply(this, originalArguments);
+    });
   },
 
 
