@@ -186,7 +186,9 @@ module.exports = Backbone.Model.extend({
       (attrs = {})[key] = val;
     }
 
-    return options = _.extend({validate: true}, options);
+    return options = _.extend({
+      validate: true
+    }, options);
   },
 
   // Lifecycle methods
@@ -194,27 +196,35 @@ module.exports = Backbone.Model.extend({
   // Returns: Promise (this)
 
   beforeFetch: function() {
-    return Promise.resolve(this);
+    return this;
   },
 
   afterFetch: function() {
-    return Promise.resolve(this);
+    return this;
   },
 
   beforeCreate: function() {
-    return Promise.resolve(this);
+    return this;
   },
 
   beforeUpdate: function() {
-    return Promise.resolve(this);
+    return this;
   },
 
   afterCreate: function() {
-    return Promise.resolve(this);
+    return this;
   },
 
   afterUpdate: function() {
-    return Promise.resolve(this);
+    return this;
+  },
+
+  beforeSave: function() {
+    return this;
+  },
+
+  afterSave: function() {
+    return this;
   },
 
   // Adds before/after fetch lifecycle methods
@@ -222,11 +232,11 @@ module.exports = Backbone.Model.extend({
   fetch: function() {
     var originalArguments = arguments;
 
-    return this.beforeFetch.apply(this, originalArguments).bind(this).then(function() {
-      return Backbone.Model.prototype.fetch.apply(this, originalArguments);
-    }).then(function() {
-      return this.afterFetch.apply(this, originalArguments);
-    });
+    return Promise.cast()
+      .bind(this)
+      .then(this.beforeFetch.bind(this, originalArguments))
+      .then(Backbone.Model.prototype.fetch.bind(this, originalArguments))
+      .then(this.afterFetch.bind(this, originalArguments));
   },
 
 
@@ -244,15 +254,13 @@ module.exports = Backbone.Model.extend({
       afterFn = this.afterUpdate;
     }
 
-    return beforeFn.apply(this, originalArguments).bind(this).then(function() {
+    return Promise.cast().bind(this).then(beforeFn.bind(this, originalArguments)).then(this.beforeSave).then(function() {
       var op = Backbone.Model.prototype.save.apply(this, originalArguments);
       if (!op) {
         return Promise.reject(this.validationError);
       }
       return op;
-    }).then(function() {
-      return afterFn.apply(this, originalArguments);
-    });
+    }).then(afterFn.bind(this, originalArguments)).then(this.afterSave);
   },
 
 
