@@ -23,6 +23,9 @@ module.exports = Backbone.Model.extend({
   // Flag to force all updates to be patches on `sync`
   updateUsingPatch: true,
 
+  // Attributes that should be saved to the database but NOT rendered to JSON
+  hiddenAttributes: [],
+
   // The defaults hash (or function) can be used to specify the default attributes for your model. 
   // When creating an instance of the model, 
   // any unspecified attributes will be set to their default value.
@@ -137,6 +140,11 @@ module.exports = Backbone.Model.extend({
   buildResponse: function(schema, json) {
     var response = {};
     _.each(schema, function(val, key) {
+      // Don't render hidden attributes
+      if (_.contains(this.hiddenAttributes, key)) {
+        return;
+      }
+
       if (_.isArray(val)) {
         if (val.length === 0) {
           // Empty array
