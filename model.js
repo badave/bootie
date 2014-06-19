@@ -156,13 +156,25 @@ module.exports = Backbone.Model.extend({
           // If the value for this key is an array of `Object`
           response[key] = [];
           _.each(json[key], function(arrVal, arrKey) {
-            response[key].push(this.buildResponse(val[0], arrVal));
+            if (!_.isEmpty(val[0])) {
+              // Recursively build response for object
+              response[key].push(this.buildResponse(val[0], arrVal));
+            } else {
+              // Empty object defined, accept all keys
+              response[key].push(arrVal);
+            }
           }.bind(this));
         }
       } else if (_.isString(val)) {
         response[key] = json[key];
       } else if (_.isObject(val) && !_.isEmpty(val)) {
-        response[key] = this.buildResponse(schema[key], json[key]);
+        if (!_.isEmpty(val)) {
+          // Recursively build response for object
+          response[key] = this.buildResponse(schema[key], json[key]);
+        } else {
+          // Empty object defined, accept all keys
+          response[key] = json[key];
+        }
       } else {
         response[key] = json[key];
       }
