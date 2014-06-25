@@ -324,7 +324,7 @@ module.exports = Backbone.Model.extend({
 
       if (updated.gte) {
         updated.gte = _.isUnixTime(updated.gte) ? updated.gte * 1000 : updated.gte;
-        updatedQuery.created["$gte"] = new Date(updated.gte).getTime();
+        updatedQuery.updated["$gte"] = new Date(updated.gte).getTime();
       } else if (updated.gt) {
         updated.gt = _.isUnixTime(updated.gt) ? updated.gt * 1000 : updated.gt;
         updatedQuery.updated["$gt"] = new Date(updated.gt).getTime();
