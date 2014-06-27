@@ -192,7 +192,8 @@ module.exports = Backbone.Model.extend({
         console.error("Error (%d): %s".error, code, data);
       }
     }
-
+    
+    res.code = code;
     res.data = envelope;
     next();
   },
