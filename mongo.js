@@ -90,6 +90,8 @@ _.extend(Mongo.prototype, {
   },
 
   // Automatically cast to HexString to ObjectID
+  // Must clone the obj and not pass it directly into the query
+  // Or else the cast function will modify the original object
   cast: function(obj) {
     _.each(obj, function(val, key) {
       if (_.isString(val)) {
@@ -163,6 +165,7 @@ _.extend(Mongo.prototype, {
 
     options = options || {};
 
+    query = _.cloneDeep(query);
     query = this.cast(query);
 
     return this.connect()
@@ -188,6 +191,7 @@ _.extend(Mongo.prototype, {
 
     options = options || {};
 
+    query = _.cloneDeep(query);
     query = this.cast(query);
 
     return this.findCursor(collectionName, query, options)
@@ -213,6 +217,7 @@ _.extend(Mongo.prototype, {
 
     options = options || {};
 
+    query = _.cloneDeep(query);
     query = this.cast(query);
 
     return this.connect()
@@ -241,6 +246,7 @@ _.extend(Mongo.prototype, {
 
     options = options || {};
 
+    query = _.cloneDeep(query);
     query = this.cast(query);
 
     return this.connect()
@@ -290,7 +296,9 @@ _.extend(Mongo.prototype, {
       delete options.fields;
     }
 
+    query = _.cloneDeep(query);
     query = this.cast(query);
+
     return this.collection(collectionName)
       .bind(this)
       .then(function(collection) {
@@ -319,10 +327,12 @@ _.extend(Mongo.prototype, {
     var callback = typeof args[args.length - 1] == 'function' && args.pop();
     var options = args.length > 2 && typeof args[args.length - 1] == 'object' && args.pop();
 
-    obj = this.cast(obj);
     options = _.extend({
       safe: true
     }, options || {}); // force safe mode
+
+    obj = _.cloneDeep(obj);
+    obj = this.cast(obj);
 
     return this.collection(collectionName)
       .bind(this)
@@ -346,11 +356,15 @@ _.extend(Mongo.prototype, {
     var callback = typeof args[args.length - 1] == 'function' && args.pop();
     var options = args.length > 3 && typeof args[args.length - 1] == 'object' && args.pop();
 
-    query = this.cast(query);
-    obj = this.cast(obj);
     options = _.extend({
       safe: true
     }, options || {}); // force safe mode
+
+    query = _.cloneDeep(query);
+    query = this.cast(query);
+
+    obj = _.cloneDeep(obj);
+    obj = this.cast(obj);
 
     return this.collection(collectionName)
       .bind(this)
@@ -374,16 +388,19 @@ _.extend(Mongo.prototype, {
     var options = typeof args[args.length - 1] == 'object' && args.pop();
     var options = args.length > 3 && typeof args[args.length - 1] == 'object' && args.pop();
 
-    query = this.cast(query);
-    obj = this.cast(obj);
     options = _.extend({
       new: true,
       safe: true
     }, options || {}); // force new mode, safe mode
 
-
     var sort = options.sort || {};
     delete options.sort;
+
+    query = _.cloneDeep(query);
+    query = this.cast(query);
+
+    obj = _.cloneDeep(obj);
+    obj = this.cast(obj);
 
     return this.collection(collectionName)
       .bind(this)
@@ -417,10 +434,12 @@ _.extend(Mongo.prototype, {
     var callback = typeof args[args.length - 1] == 'function' && args.pop();
     var options = args.length > 2 && typeof args[args.length - 1] == 'object' && args.pop();
 
-    query = this.cast(query);
     options = _.extend({
       safe: true
     }, options || {}); // force new mode, safe mode
+
+    query = _.cloneDeep(query);
+    query = this.cast(query);
 
     return this.collection(collectionName)
       .bind(this)
@@ -443,6 +462,7 @@ _.extend(Mongo.prototype, {
     var options = args.length > 2 && typeof args[args.length - 1] == 'object' && args.pop();
     options = options || {};
 
+    query = _.cloneDeep(query);
     query = this.cast(query);
 
     return this.collection(collectionName)
@@ -473,11 +493,13 @@ _.extend(Mongo.prototype, {
     var callback = typeof args[args.length - 1] == 'function' && args.pop();
     var options = args.length > 2 && typeof args[args.length - 1] == 'object' && args.pop();
 
-    query = this.cast(query);
     options = _.extend({
       safe: true,
       new: true
     }, options || {});
+
+    query = _.cloneDeep(query);
+    query = this.cast(query);
 
     return this.findAndModify(collectionName, query, {
         "$inc": {

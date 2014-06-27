@@ -80,7 +80,7 @@ describe("Mongo", function() {
   before(function() {
     return mongo.remove(testTable, {})
       .then(function() {
-        return mongo.insert(testTable, _.clone(testData));
+        return mongo.insert(testTable, _.cloneDeep(testData));
       });
   });
 
