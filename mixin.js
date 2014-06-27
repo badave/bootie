@@ -6,6 +6,7 @@ var uuid = require('uuid');
 var moment = require('moment');
 var URLSafeBase64 = require('urlsafe-base64');
 var crypto = require('crypto');
+var ObjectID = require('mongodb').ObjectID;
 
 var mixin = module.exports = {};
 
@@ -60,6 +61,10 @@ _.extend(_, {
 
   validateBase64: function(str) {
     return URLSafeBase64.validate(str);
+  },
+
+  isObjectID: function(value) {
+    return ObjectID.isValid(value);
   },
 
   isUnixTime: function(value) {
