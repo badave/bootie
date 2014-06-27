@@ -126,6 +126,11 @@ module.exports = Backbone.Model.extend({
     var attrs = {};
     _.merge(attrs, this.previousAttributes(), this.attributes, body);
     this.attributes = attrs;
+
+    // An array of attributes that were set from the request body
+    this.attributesFromRequest = _.keys(body);
+
+    return this;
   },
 
   // Alias for `render`
