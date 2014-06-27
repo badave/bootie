@@ -167,13 +167,16 @@ module.exports = Backbone.Model.extend({
   // Default middleware for handling error responses
   errorResponse: function(err, req, res, next) {
     // Default to 500, but allow override
-    res.code = res.code || err.code || 500;
+    var code = res.code || err.code || 500;
+    var data = err.message || "";
 
-    var data = res.data || {};
     var envelope = {
       meta: {
-        code: res.code,
-        error: err.message
+        code: code,
+        error: {
+          message: data,
+          code: code
+        }
       },
       data: data
     };
@@ -181,12 +184,12 @@ module.exports = Backbone.Model.extend({
     // TODO
     // We should log these errors somewhere remotely
     if (this.debug) {
-      if (res.code >= 500) {
+      if (code >= 500) {
         if (err && err.stack && err.stack.error) {
           console.error(err.stack.error);
         }
       } else {
-        console.error("Error (%d): %s".error, res.code, err.message);
+        console.error("Error (%d): %s".error, code, data);
       }
     }
 
