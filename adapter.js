@@ -16,15 +16,11 @@ var Promise = require('bluebird');
 var Backbone = require('backbone');
 var request = require('request');
 
-// Some notes: 
-// This one actually tracks LAST_REQUEST, LAST_RESPONSE, and LAST_BODY, 
-// so you can look at those for logging or error handling if need be
 module.exports = Backbone.Model.extend({
   urlRoot: "",
-  version: "",
 
   baseUrl: function() {
-    return this.version ? this.urlRoot + "/" + this.version : this.urlRoot;
+    return this.urlRoot;
   },
 
   // Build the request options config object
