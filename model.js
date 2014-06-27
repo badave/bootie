@@ -138,52 +138,47 @@ module.exports = Backbone.Model.extend({
     return this.render();
   },
 
-  // Builds a response based on `schema` and the model
-  // There is a flaw where if the schema doesn't match the database
-  // For nested objects that don't exist 
-  // it might throw a `Cannot read property of undefined` error
+  // Builds a response based on `schema` and the model attributes
   buildResponse: function(schema, json) {
     var response = {};
-    _.each(schema, function(val, key) {
+
+    if (_.isEmpty(schema)) {
+      return json;
+    }
+
+    _.each(json, function(val, key) {
       // Don't render hidden attributes
       if (_.contains(this.hiddenAttributes, key)) {
         return;
       }
 
+      // Schema does not have this key
+      if (!_.has(schema, key)) {
+        return;
+      }
+
       if (_.isArray(val)) {
+        response[key] = [];
         if (val.length === 0) {
           // Empty array
-          response[key] = json[key];
-        } else if (_.isString(val[0])) {
-          // If the value for this key is an array of `Type`
-          response[key] = json[key];
-        } else {
-          // If the value for this key is an array of `Object`
-          response[key] = [];
-          _.each(json[key], function(arrVal, arrKey) {
-            if (!_.isEmpty(val[0])) {
-              // Recursively build response for object
-              response[key].push(this.buildResponse(val[0], arrVal));
-            } else {
-              // Empty object defined, accept all keys
-              response[key].push(arrVal);
-            }
+        } else if (_.isObject(val[0])) {
+          _.each(val, function(arrVal) {
+            // Recursively build response for object
+            response[key].push(this.buildResponse(schema[key][0], arrVal));
           }.bind(this));
-        }
-      } else if (_.isString(val)) {
-        response[key] = json[key];
-      } else if (_.isObject(val) && !_.isEmpty(val)) {
-        if (!_.isEmpty(val)) {
-          // Recursively build response for object
-          response[key] = this.buildResponse(schema[key], json[key]);
         } else {
-          // Empty object defined, accept all keys
+          // Array of String, Number, or Boolean
           response[key] = json[key];
         }
+      } else if (_.isObject(val)) {
+        // Object
+        response[key] = this.buildResponse(schema[key], json[key]);
       } else {
+        // String, Number, or Boolean
         response[key] = json[key];
       }
     }.bind(this));
+
     return response;
   },
 
