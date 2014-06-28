@@ -118,6 +118,22 @@ module.exports = Backbone.Model.extend({
   // Do any request body sanitation here
   // TODO: support deep set
   setFromRequest: function(body) {
+    // TODO: Improve this
+    var schema = _.result(this, 'schema');
+    _.each(schema, function(val, key) {
+      if (!_.has(body, key)) {
+        return;
+      }
+
+      if (val === 'integer') {
+        // Perform `parseInt` on all integers
+        body[key] = _.parseInt(body[key]);
+      } else if (val === 'float') {
+        // Perform `parseFloat` on all integers
+        body[key] = _.parseFloat(body[key]);
+      }
+    }.bind(this));
+
     // Set new attributes
     this.set(body);
 
