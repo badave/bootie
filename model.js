@@ -158,6 +158,7 @@ module.exports = Backbone.Model.extend({
       }
 
       if (_.isArray(val)) {
+        // Arrays
         response[key] = [];
         if (val.length === 0) {
           // Empty array
@@ -171,11 +172,23 @@ module.exports = Backbone.Model.extend({
           response[key] = json[key];
         }
       } else if (_.isObject(val)) {
-        // Object
-        response[key] = this.buildResponse(schema[key], json[key]);
+        // Objects
+        if (schema[key] === 'date') {
+          // Date object
+          response[key] = json[key];
+        } else {
+          // Object
+          response[key] = this.buildResponse(schema[key], json[key]);
+        }
       } else {
-        // String, Number, or Boolean
-        response[key] = json[key];
+        // String, Number (int or float), or Boolean
+        if (schema[key] === 'integer') {
+          response[key] = _.parseInt(json[key]);
+        } else if (schema[key] === 'float') {
+          response[key] = _.parseFloat(json[key]);
+        } else {
+          response[key] = json[key];
+        }
       }
     }.bind(this));
 
