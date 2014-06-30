@@ -68,11 +68,17 @@ app.use(express.static(path.join(__dirname, '/public'), {
   maxAge: oneDay
 }));
 
-// Parse application/json and application/x-www-form-urlencoded
-app.use(bodyParser());
+// Parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
+
+// Parse application/json
+app.use(bodyParser.json());
 
 // Parse application/vnd.api+json as json
 app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
+
 
 
 
