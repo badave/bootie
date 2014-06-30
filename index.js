@@ -38,6 +38,10 @@ Bootie.mixin = require('./mixin');
 // All external libraries
 // ---
 
+// Database driver
+// [Annotated Source](mongo.html)
+Bootie.Mongo = require('./mongo');
+
 // Database manager
 // [Annotated Source](database.html)
 Bootie.Database = require('./database');

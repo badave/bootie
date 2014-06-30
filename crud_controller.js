@@ -4,7 +4,7 @@
 // ---
 
 // CrudController helps making CRUD routing easy by providing a controller that automatically maps all CRUD routes
-// 
+//
 // See documentation for [Controller](controller.html)
 
 // TODO
@@ -103,10 +103,10 @@ module.exports = Controller.extend({
     var qo = this.parseQueryString(req);
     var collection = this.setupCollection(req, qo);
 
-    options = options || {};
-    _.merge(options, {
-      query: qo.query
-    });
+    // Merge `options.query` with the query string query and filters
+    if (options && options.query) {
+      _.merge(qo.query, options.query);
+    }
 
     if (this.debug) {
       console.log("Find with Query: %s".verbose, JSON.stringify(qo));
