@@ -16,9 +16,9 @@ module.exports = function(options) {
   router.routes = [];
 
   // Base URL of the router with optional version
-  router.url = "/";
+  router.url = "";
   if (options.version) {
-    router.url += options.version;
+    router.url += "/" + options.version;
   }
 
   // Set of active routes
