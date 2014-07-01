@@ -468,7 +468,7 @@ _.extend(Mongo.prototype, {
     return this.collection(collectionName)
       .bind(this)
       .then(function(collection) {
-        // weird bug if options is empty, and undefined doesn't seem to work -- seems to either be mongo-node or the promisify framework ... 
+        // weird bug if options is empty, and undefined doesn't seem to work -- seems to either be mongo-node or the promisify framework ...
         // since aggregate has a different set of options from everything else, it's probably default objects
         if (!_.isEmpty(options)) {
           return collection.aggregateAsync(query, options);
