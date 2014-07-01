@@ -64,14 +64,14 @@ module.exports = Controller.extend({
           break;
         case 'R':
           // Find
-          this.routes.get[basePath] = {
+          this.routes.get[basePath + ".:format?"] = {
             action: this.find,
             middleware: this.getRouteMiddleware('find')
           };
           break;
         case 'O':
           // FindOne
-          this.routes.get[basePath + "/:id"] = {
+          this.routes.get[basePath + "/:id.:format?"] = {
             action: this.findOne,
             middleware: this.getRouteMiddleware('findOne')
           };

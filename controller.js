@@ -4,15 +4,15 @@
 // ---
 
 // Controller helps facilitate routing via express by providing configuring route handlers
-// 
+//
 // For example, a route to `/users/:id` would be handled by a `UsersController` with function `findOne`
-// 
+//
 // It provides a way for each controller to setup the routes and handlers it wants to respond to
-// 
+//
 // Also provides a mechanism to define pre, before, and after middleware per controller or per route
-// 
+//
 // Finally, it also provides response and error handling middleware
-// 
+//
 // Also parses query strings for filter, limit, and sort
 
 // Dependencies
@@ -78,7 +78,7 @@ module.exports = Backbone.Model.extend({
   },
 
   // Setup routes that this controller should handle
-  // 
+  //
   // Example:
   // this.routes.get["/test"] = {
   //   action: this.testGet,
@@ -192,7 +192,7 @@ module.exports = Backbone.Model.extend({
         console.error("Error (%d): %s".error, code, data);
       }
     }
-    
+
     res.code = code;
     res.data = envelope;
     next();
