@@ -4,6 +4,7 @@ var _ = require('lodash');
 var eyes = require('eyes');
 var uuid = require('uuid');
 var moment = require('moment');
+var accounting = require('accounting');
 var URLSafeBase64 = require('urlsafe-base64');
 var crypto = require('crypto');
 var ObjectID = require('mongodb').ObjectID;
@@ -19,6 +20,14 @@ _.extend(_, {
   }),
 
   parseFloat: parseFloat,
+
+  centsToDollars: function(value) {
+    return accounting.formatNumber(accounting.toFixed(value / 100, 2), 2);
+  },
+
+  dollarsToCents: function(value) {
+    return _.parseInt(accounting.toFixed(accounting.unformat(value) * 100, 0));
+  },
 
   // Encrypts a utf8 string into an encrypted hex string
   // https://github.com/joyent/node/issues/6386
