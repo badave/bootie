@@ -23,6 +23,9 @@ module.exports = Backbone.Model.extend({
   // Flag to force all updates to be patches on `sync`
   updateUsingPatch: true,
 
+  // Attributes that are not settable from the request
+  readOnlyAttributes: [],
+
   // Attributes that should be saved to the database but NOT rendered to JSON
   hiddenAttributes: [],
 
@@ -135,7 +138,7 @@ module.exports = Backbone.Model.extend({
     }.bind(this));
 
     // Set new attributes
-    this.set(body);
+    this.set(_.omit(body, _.result(this, 'readOnlyAttributes')));
 
     // To support a `patch` operation
     // We're gonna `default/extend` all existing attributes after the `set`
