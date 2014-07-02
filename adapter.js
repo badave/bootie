@@ -4,7 +4,7 @@
 // ---
 // What isn't an Adapter?
 // It's not a Controller.
-// 
+//
 // TODO
 // ---
 // 2014/05/22 - Peter will add some comments

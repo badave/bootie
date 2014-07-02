@@ -28,7 +28,7 @@ module.exports = Backbone.Model.extend({
   initialize: function() {
     this.mongodbs = {};
     this.caches = {};
-    
+
     // Setup all configured mongo connections
     _.each(this.get('mongodbs'), function(val, key) {
       this.setupMongo(key, val);
@@ -72,7 +72,7 @@ module.exports = Backbone.Model.extend({
 
   setupMongo: function(name, url) {
     this.mongodbs[name] = new Mongo(url);
-    
+
     // Events
     this.mongodbs[name].on("connect", function(url) {
       if (this.debug) {

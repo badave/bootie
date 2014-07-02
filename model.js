@@ -26,13 +26,13 @@ module.exports = Backbone.Model.extend({
   // Attributes that should be saved to the database but NOT rendered to JSON
   hiddenAttributes: [],
 
-  // The defaults hash (or function) can be used to specify the default attributes for your model. 
-  // When creating an instance of the model, 
+  // The defaults hash (or function) can be used to specify the default attributes for your model.
+  // When creating an instance of the model,
   // any unspecified attributes will be set to their default value.
-  // 
-  // Remember that in JavaScript, objects are passed by reference, 
-  // so if you include an object as a default value, 
-  // it will be shared among all instances. 
+  //
+  // Remember that in JavaScript, objects are passed by reference,
+  // so if you include an object as a default value,
+  // it will be shared among all instances.
   // Instead, define defaults as a function.
   // Object or Function
   // string: null
@@ -416,7 +416,7 @@ module.exports = Backbone.Model.extend({
   // options contains 2 callbacks: `success` and `error`
   // Both callbacks have parameters (model, resp, options)
   // `resp` is either a `document` or an `error` object
-  // 
+  //
   // Events
   // ---
   // A `request` event is fired before with parameters (model, op, options)
